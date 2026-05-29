@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Wing Squad Builder - Pandorum Edition</title>
+    <title>X-Wing Squad Builder - Pandorum Ultimate</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .card-custom { background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; margin-bottom: 15px; padding: 15px; }
         .badge-points { background-color: #ffc107; color: #000; font-weight: bold; font-size: 0.9rem; }
-        .faction-header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 25px; margin-bottom: 15px; color: #ffc107; }
+        .faction-header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 25px; margin-bottom: 15px; color: #ffc107; text-transform: uppercase; font-size: 1.4rem; }
         .btn-add { background-color: #198754; color: white; border: none; }
         .btn-add:hover { background-color: #157347; color: white; }
         .squad-list { background-color: #1a1a1a; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; position: sticky; top: 20px; }
-        .upgrade-select { background-color: #2b2b2b; color: #fff; border: 1px solid #444; font-size: 0.85rem; padding: 2px 5px; border-radius: 4px; margin-top: 5px; }
+        .upgrade-select { background-color: #2b2b2b; color: #fff; border: 1px solid #444; font-size: 0.85rem; padding: 2px 5px; border-radius: 4px; margin-top: 5px; max-width: 100%; }
+        .loading-status { color: #ffc107; font-style: italic; margin-bottom: 15px; }
+        .pilot-ship-name { color: #aaa; font-size: 0.85rem; font-style: italic; }
     </style>
 </head>
 <body>
@@ -22,24 +24,22 @@
     <div class="row">
         <div class="col-12 text-center mb-4">
             <h1 class="display-5 text-warning fw-bold">X-Wing Squad Builder</h1>
-            <p class="lead text-muted">Database locale integrato e indipendente</p>
+            <p class="lead text-muted">Sincronizzato con SogeMoge & Personalizzato da Pandorum</p>
+            <div id="loading-msg" class="loading-status">Connessione al database di SogeMoge in corso...</div>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-8">
-            <h2 class="faction-header">Ribelli (Rebel Alliance)</h2>
-            <div id="rebel-pilots" class="row"></div>
-
-            <h2 class="faction-header">Impero Galattico (Galactic Empire)</h2>
-            <div id="empire-pilots" class="row"></div>
+            <div id="factions-container">
+                </div>
         </div>
 
         <div class="col-md-4">
             <div class="squad-list shadow">
                 <h3 class="h4 text-warning mb-3">La tua Squadriglia</h3>
                 <div id="squad-content">
-                    <p class="text-muted italic">Nessun pilota selezionato. Clicca su "+ Aggiungi" per iniziare a creare la lista.</p>
+                    <p class="text-muted italic">Nessun pilota selezionato. Clicca su "+ Aggiungi" per iniziare.</p>
                 </div>
                 <hr style="border-color: #444;">
                 <div class="d-flex justify-content-between align-items-center">
@@ -52,75 +52,138 @@
 </div>
 
 <script>
-    const database = {
-        pilots: [
-            { name: "Luke Skywalker", id: "lukeskywalker", faction: "Rebel Alliance", ship: "T-65 X-wing", points: 62, slots: ["Talent", "Torpedo", "Astromech"] },
-            { name: "Wedge Antilles", id: "wedgeantilles", faction: "Rebel Alliance", ship: "T-65 X-wing", points: 54, slots: ["Talent", "Torpedo", "Astromech"] },
-            { name: "Han Solo", id: "hansolo", faction: "Rebel Alliance", ship: "Modified YT-1300", points: 81, slots: ["Talent", "Missile", "Crew", "Crew"] },
-            { name: "Soontir Fel", id: "soontirfel", faction: "Galactic Empire", ship: "TIE/in Interceptor", points: 49, slots: ["Talent", "Modification"] },
-            { name: "Iden Versio", id: "idenversio", faction: "Galactic Empire", ship: "TIE/ln Fighter", points: 40, slots: ["Talent", "Modification"] },
-            { name: "Darth Vader", id: "darthvader", faction: "Galactic Empire", ship: "TIE/x1 Advanced", points: 67, slots: ["Talent", "Sensor", "Missile"] }
-        ],
-        upgrades: {
-            Talent: [
-                { name: "Push the Limit", points: 3 },
-                { name: "Crack Shot", points: 1 },
-                { name: "Predator", points: 2 }
-            ],
-            Torpedo: [
-                { name: "Proton Torpedoes", points: 12 },
-                { name: "Plasma Torpedoes", points: 7 }
-            ],
-            Astromech: [
-                { name: "R2-D2", points: 4 },
-                { name: "R5-D8", points: 3 }
-            ],
-            Modification: [
-                { name: "Shield Upgrade", points: 6 },
-                { name: "Engine Upgrade", points: 7 }
-            ],
-            Crew: [
-                { name: "Chewbacca", points: 4 },
-                { name: "C-3PO", points: 3 }
-            ],
-            Sensor: [
-                { name: "Advanced Sensors", points: 3 }
-            ],
-            Missile: [
-                { name: "Concussion Missiles", points: 6 }
-            ]
-        }
+    // ==========================================
+    // ✍️ INSERISCI QUI I TUOI PUNTI PERSONALIZZATI
+    // ==========================================
+    // Inserisci l'id del pilota (o della miglioria) in minuscolo e senza spazi, seguito dai nuovi punti.
+    // Esempio: "lukeskywalker": 55, "darthvader": 72
+    const I_MIEI_PUNTI = {
+        "lukeskywalker": 58, 
+        "darthvader": 70,
+        "protontorpedoes": 10
     };
 
+    // Configurazione sorgenti di SogeMoge
+    const BASE_RAW_URL = "https://raw.githubusercontent.com/SogeMoge/xwing-data2-legacy/master/data/";
+    
+    // Lista delle fazioni standard da caricare
+    const FACTION_FILES = [
+        { id: "rebelalliance", name: "Ribelli (Rebel Alliance)", file: "pilots/rebel-alliance.json" },
+        { id: "galacticempire", name: "Impero Galattico (Galactic Empire)", file: "pilots/galactic-empire.json" },
+        { id: "scandvillainy", name: "Feccia e Malavita (Scum and Villainy)", file: "pilots/scum-and-villainy.json" }
+    ];
+
+    const UPGRADE_FILES = [
+        "upgrades/talent.json",
+        "upgrades/torpedo.json",
+        "upgrades/astromech.json",
+        "upgrades/missile.json",
+        "upgrades/crew.json",
+        "upgrades/sensor.json",
+        "upgrades/modification.json"
+    ];
+
+    let database = { pilots: [], upgrades: {} };
     let currentSquad = [];
 
-    function renderPilots() {
-        const rebelDiv = document.getElementById('rebel-pilots');
-        const empireDiv = document.getElementById('empire-pilots');
-        rebelDiv.innerHTML = "";
-        empireDiv.innerHTML = "";
-        
-        database.pilots.forEach((pilot, index) => {
-            const cardHtml = `
-                <div class="col-sm-6">
-                    <div class="card-custom shadow-sm">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <h5 class="mb-1 text-white fw-bold">${pilot.name}</h5>
-                            <span class="badge badge-points">${pilot.points} pt</span>
-                        </div>
-                        <p class="text-muted small mb-2">${pilot.ship}</p>
-                        <div class="mb-3">
-                            ${pilot.slots.map(s => `<span class="badge bg-secondary me-1" style="font-size:0.7rem;">${s}</span>`).join('')}
-                        </div>
-                        <button class="btn btn-sm btn-add w-100 fw-bold" onclick="addPilotToSquad(${index})">+ Aggiungi alla lista</button>
-                    </div>
-                </div>
-            `;
-            if(pilot.faction === "Rebel Alliance") {
-                rebelDiv.innerHTML += cardHtml;
-            } else {
-                empireDiv.innerHTML += cardHtml;
+    // Funzione per ripulire i testi e accoppiarli con la tua tabella punti
+    function getCustomCost(item) {
+        const cleanId = item.id || item.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (I_MIEI_PUNTI[cleanId] !== undefined) {
+            return I_MIEI_PUNTI[cleanId]; // Usa il tuo punto modificato
+        }
+        return item.cost || item.points || 0; // Usa il punto originale di Soge
+    }
+
+    async function loadDatabase() {
+        try {
+            // 1. Carichiamo i Piloti dalle fazioni
+            for (const faction of FACTION_FILES) {
+                const res = await fetch(BASE_RAW_URL + faction.file);
+                if (res.ok) {
+                    const ships = await res.json();
+                    // Struttura xwing-data2: i piloti sono dentro le navi (ships)
+                    ships.forEach(ship => {
+                        if (ship.pilots) {
+                            ship.pilots.forEach(p => {
+                                database.pilots.push({
+                                    name: p.name,
+                                    id: p.id || p.name.toLowerCase().replace(/[^a-z0-9]/g, ""),
+                                    faction: faction.id,
+                                    ship: ship.name,
+                                    points: getCustomCost(p),
+                                    slots: p.slots || []
+                                });
+                            });
+                        }
+                    });
+                }
             }
+
+            // 2. Carichiamo le Migliorie (Upgrades)
+            for (const upFile of UPGRADE_FILES) {
+                const res = await fetch(BASE_RAW_URL + upFile);
+                if (res.ok) {
+                    const upgradesList = await res.json();
+                    upgradesList.forEach(up => {
+                        const slotType = up.sides[0].type;
+                        if (!database.upgrades[slotType]) {
+                            database.upgrades[slotType] = [];
+                        }
+                        
+                        // Gestione costo fisso o variabile
+                        let calculatedCost = 0;
+                        if (up.cost && up.cost.value !== undefined) {
+                            calculatedCost = up.cost.value;
+                        } else if (typeof up.cost === 'number') {
+                            calculatedCost = up.cost;
+                        }
+
+                        database.upgrades[slotType].push({
+                            name: up.name,
+                            id: up.id || up.name.toLowerCase().replace(/[^a-z0-9]/g, ""),
+                            points: I_MIEI_PUNTI[up.id] !== undefined ? I_MIEI_PUNTI[up.id] : calculatedCost
+                        });
+                    });
+                }
+            }
+
+            document.getElementById('loading-msg').innerHTML = "✅ Database SogeMoge caricato e personalizzato con i tuoi punti!";
+            renderFactions();
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loading-msg').innerHTML = "⚠️ Errore nel caricamento online. Verifica la connessione.";
+        }
+    }
+
+    function renderFactions() {
+        const container = document.getElementById('factions-container');
+        container.innerHTML = "";
+
+        FACTION_FILES.forEach(faction => {
+            const factionPilots = database.pilots.filter(p => p.faction === faction.id);
+            if (factionPilots.length === 0) return;
+
+            let factionHtml = `<h2 class="faction-header">${faction.name}</h2><div class="row">`;
+            
+            factionPilots.forEach(pilot => {
+                const index = database.pilots.indexOf(pilot);
+                factionHtml += `
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="card-custom shadow-sm">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h6 class="mb-1 text-white fw-bold">${pilot.name}</h6>
+                                <span class="badge badge-points">${pilot.points} pt</span>
+                            </div>
+                            <p class="pilot-ship-name mb-2">${pilot.ship}</p>
+                            <button class="btn btn-sm btn-add w-100 fw-bold py-1" onclick="addPilotToSquad(${index})">+ Aggiungi</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            factionHtml += `</div>`;
+            container.innerHTML += factionHtml;
         });
     }
 
@@ -142,7 +205,6 @@
     };
 
     window.changeUpgrade = function(pilotUniqueId, slot, upgradeIndex) {
-        const pilot = currentSquad.find(p => p.uniqueId === upgradeId);
         const pObj = currentSquad.find(p => p.uniqueId === pilotUniqueId);
         if (pObj) {
             pObj.selectedUpgrades[slot] = upgradeIndex;
@@ -155,7 +217,7 @@
         const totalPointsSpan = document.getElementById('total-points');
         
         if (currentSquad.length === 0) {
-            content.innerHTML = `<p class="text-muted italic">Nessun pilota selezionato. Clicca su "+ Aggiungi" per iniziare a creare la lista.</p>`;
+            content.innerHTML = `<p class="text-muted italic">Nessun pilota selezionato.</p>`;
             totalPointsSpan.innerText = "0 / 200";
             return;
         }
@@ -177,11 +239,11 @@
 
                 upgradeHtml += `
                     <div class="d-flex align-items-center justify-content-between mt-1">
-                        <small class="text-muted">${slot}:</small>
+                        <small class="text-muted" style="font-size:0.75rem;">${slot}:</small>
                         <select class="upgrade-select" onchange="changeUpgrade(${pilot.uniqueId}, '${slot}', this.value)">
-                            <option value="0">Nessuno (0 pt)</option>
+                            <option value="0">Nessuno</option>
                             ${available.map((up, i) => `
-                                <option value="${i+1}" ${selectedIdx == (i+1) ? 'selected' : ''}>${up.name} (+${up.points} pt)</option>
+                                <option value="${i+1}" ${selectedIdx == (i+1) ? 'selected' : ''}>${up.name} (+${up.points}pt)</option>
                             `).join('')}
                         </select>
                     </div>
@@ -193,10 +255,10 @@
             html += `
                 <div class="p-2 mb-2 rounded" style="background-color: #252525; border: 1px solid #444;">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-white fw-bold" style="font-size:0.95rem;">${pilot.name}</span>
-                        <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:0.75rem;" onclick="removePilot(${pilot.uniqueId})">X</button>
+                        <span class="text-white fw-bold" style="font-size:0.9rem;">${pilot.name}</span>
+                        <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:0.7rem;" onclick="removePilot(${pilot.uniqueId})">X</button>
                     </div>
-                    <small class="text-warning block" style="font-size:0.8rem;">Parziale: ${pilotCost} pt</small>
+                    <small class="text-warning" style="font-size:0.75rem;">${pilotCost} pt</small>
                     <div class="mt-1" style="border-top: 1px dashed #444; padding-top:4px;">
                         ${upgradeHtml}
                     </div>
@@ -213,7 +275,7 @@
         }
     }
 
-    renderPilots();
+    window.onload = loadDatabase;
 </script>
 
 </body>
