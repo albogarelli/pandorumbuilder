@@ -32,7 +32,8 @@
     <div class="row">
         <div class="col-md-8">
             <div id="factions-container">
-                </div>
+                <!-- Le navi di Darker compariranno qui -->
+            </div>
         </div>
 
         <div class="col-md-4">
@@ -57,14 +58,14 @@
     // ==========================================
     // Se un punto di Darker non ti piace, lo sovrascrivi qui. Altrimenti lascialo vuoto {}.
     const I_MIEI_PUNTI = {
-        "lukeskywalker": 53 // Esempio: se Darker lo ha messo a 59 e tu lo vuoi a 53
+        "lukeskywalker": 53 
     };
 
-    // Il link "Raw" che punta alla cartella pilots dentro la repository di Darker333
+    // Il link che punta alla cartella pilots dentro la repository di Darker333
     const BASE_DARKER_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/pilots/";
 
-    // Lista esatta dei file delle navi dei Ribelli e dell'Impero presenti da Darker
-    // Il sistema li scaricherà tutti in un colpo solo da internet!
+    // Lista dei file delle navi. Se noti che una nave non carica, 
+    // controlla se da Darker il file si chiama in modo leggermente diverso (es. t65xwing.json)
     const FILE_NAVI = [
         // Ribelli
         "rebel-alliance/t-65-x-wing.json",
@@ -97,7 +98,7 @@
     async function loadDatabase() {
         let loadedCount = 0;
         try {
-            for (const file di FILE_NAVI) {
+            for (const file of FILE_NAVI) {
                 const res = await fetch(BASE_DARKER_URL + file);
                 if (res.ok) {
                     const shipData = await res.json();
@@ -122,7 +123,7 @@
                 document.getElementById('loading-msg').innerHTML = "✅ Database di Darker333 caricato con successo!";
                 renderFactions();
             } else {
-                document.getElementById('loading-msg').innerHTML = "⚠️ Attenzione: Nessun file trovato. Verificare i percorsi della repository.";
+                document.getElementById('loading-msg').innerHTML = "⚠️ Attenzione: Nessun file trovato. Controllare i nomi dei file o il link della repository di Darker333.";
             }
         } catch (error) {
             console.error(error);
