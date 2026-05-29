@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Wing Squad Builder - Pandorum & Darker Edition</title>
+    <title>X-Wing Squad Builder - Pandorum Complete</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .card-custom { background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; margin-bottom: 15px; padding: 15px; }
         .badge-points { background-color: #ffc107; color: #000; font-weight: bold; font-size: 0.9rem; }
-        .faction-header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 25px; margin-bottom: 15px; color: #ffc107; text-transform: uppercase; font-size: 1.4rem; }
+        .faction-header { border-bottom: 2px solid #ffc107; padding-bottom: 10px; margin-top: 35px; margin-bottom: 20px; color: #ffc107; text-transform: uppercase; font-size: 1.5rem; fw-bold; }
         .btn-add { background-color: #198754; color: white; border: none; }
         .btn-add:hover { background-color: #157347; color: white; }
         .squad-list { background-color: #1a1a1a; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; position: sticky; top: 20px; }
-        .upgrade-select { background-color: #2b2b2b; color: #fff; border: 1px solid #444; font-size: 0.85rem; padding: 2px 5px; border-radius: 4px; margin-top: 5px; max-width: 100%; }
-        .loading-status { color: #ffc107; font-style: italic; margin-bottom: 15px; }
+        .loading-status { color: #ffc107; font-style: italic; margin-bottom: 15px; font-size: 1.2rem; }
         .pilot-ship-name { color: #aaa; font-size: 0.85rem; font-style: italic; }
+        .filter-btn { margin-right: 5px; margin-bottom: 5px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -24,15 +24,18 @@
     <div class="row">
         <div class="col-12 text-center mb-4">
             <h1 class="display-5 text-warning fw-bold">X-Wing Squad Builder</h1>
-            <p class="lead text-muted">Punti aggiornati da Darker333 + Ritocchi di Pandorum</p>
-            <div id="loading-msg" class="loading-status">Connessione al database di Darker333 in corso...</div>
+            <p class="lead text-muted">Database Totale di Darker333 + Bilanciamento di Pandorum</p>
+            <div id="loading-msg" class="loading-status">Inizializzazione flotta galattica (Caricamento di circa 100 file)...</div>
+            
+            <!-- Pulsanti per saltare rapidamente alle fazioni -->
+            <div class="mt-3" id="faction-filters"></div>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-8">
             <div id="factions-container">
-                <!-- Le navi di Darker compariranno qui -->
+                <!-- Qui compariranno automaticamente TUTTE le navi del gioco -->
             </div>
         </div>
 
@@ -54,38 +57,54 @@
 
 <script>
     // ==========================================
-    // ✍️ QUI METTI SOLO LE TUE MODIFICHE PERSONALI
+    // ✍️ SEZIONE PERSONALIZZAZIONE PUNTI DI PANDORUM
     // ==========================================
-    // Se un punto di Darker non ti piace, lo sovrascrivi qui. Altrimenti lascialo vuoto {}.
+    // Qui puoi sovrascrivere QUALSIASI costo inserito da Darker333.
+    // Inserisci l'ID (xws) del pilota tutto minuscolo e senza spazi, seguito dai tuoi punti.
     const I_MIEI_PUNTI = {
-        "lukeskywalker": 53 
+        "lukeskywalker": 53,
+        "wedgeantilles": 54,
+        "darthvader": 65
+        // Aggiungi qui sotto tutti i piloti che vuoi modificare, separati da una virgola!
     };
 
-    // Il link che punta alla cartella pilots dentro la repository di Darker333
     const BASE_DARKER_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/pilots/";
 
-    // Lista dei file delle navi. Se noti che una nave non carica, 
-    // controlla se da Darker il file si chiama in modo leggermente diverso (es. t65xwing.json)
+    // ELENCO COMPLETO DI TUTTI I ~100 FILE DELLA REPOSITORY DI DARKER333
     const FILE_NAVI = [
-        // Ribelli
-        "rebel-alliance/t-65-x-wing.json",
-        "rebel-alliance/btl-a4-y-wing.json",
-        "rebel-alliance/rz-1-a-wing.json",
-        "rebel-alliance/modified-yt-1300.json",
-        // Impero
-        "galactic-empire/tie-ln-fighter.json",
-        "galactic-empire/tie-in-interceptor.json",
-        "galactic-empire/tie-advanced-x1.json",
-        "galactic-empire/firespray-class-patrol-craft.json"
+        // REBEL ALLIANCE (Ribelli)
+        "rebel-alliance/a-uzit-gauntlet-fighter.json", "rebel-alliance/arc-170-starfighter.json", "rebel-alliance/attack-shuttle.json", "rebel-alliance/auzituck-gunship.json", "rebel-alliance/bwing-e2.json", "rebel-alliance/btl-a4-y-wing.json", "rebel-alliance/btl-s8-k-wing.json", "rebel-alliance/cr90-corellian-corvette.json", "rebel-alliance/e-wing.json", "rebel-alliance/fang-fighter.json", "rebel-alliance/gr-75-medium-transport.json", "rebel-alliance/hwk-290-light-freighter.json", "rebel-alliance/modified-yt-1300.json", "rebel-alliance/rz-1-a-wing.json", "rebel-alliance/sheathipede-class-shuttle.json", "rebel-alliance/t-65-x-wing.json", "rebel-alliance/tie-ln-fighter.json", "rebel-alliance/u-wing.json", "rebel-alliance/vcx-100-light-freighter.json", "rebel-alliance/v-wing.json", "rebel-alliance/yt-2400-light-freighter.json", "rebel-alliance/z-95-headhunter.json",
+
+        // GALACTIC EMPIRE (Impero)
+        "galactic-empire/a-uzit-gauntlet-fighter.json", "galactic-empire/alpha-class-star-wing.json", "galactic-empire/firespray-class-patrol-craft.json", "galactic-empire/gozanti-class-cruiser.json", "galactic-empire/lambda-class-t-4a-shuttle.json", "galactic-empire/raider-class-corvette.json", "galactic-empire/tie-advanced-v1.json", "galactic-empire/tie-advanced-x1.json", "galactic-empire/tie-ag-aggressor.json", "galactic-empire/tie-ca-punisher.json", "galactic-empire/tie-d-defender.json", "galactic-empire/tie-in-interceptor.json", "galactic-empire/tie-ln-fighter.json", "galactic-empire/tie-ph-phantom.json", "galactic-empire/tie-rb-heavy.json", "galactic-empire/tie-reaper.json", "galactic-empire/tie-sa-bomber.json", "galactic-empire/tie-sk-striker.json", "galactic-empire/tie-v1-assault-shuttle.json", "galactic-empire/tie-vn-silencer.json", "galactic-empire/vt-49-decimator.json",
+
+        // SCUM AND VILLAINY (Feccia)
+        "scum-and-villainy/a-uzit-gauntlet-fighter.json", "scum-and-villainy/aggressor-assault-fighter.json", "scum-and-villainy/btl-a4-y-wing.json", "scum-and-villainy/croc-class-light-cruiser.json", "scum-and-villainy/customized-yt-1300.json", "scum-and-villainy/escape-craft.json", "scum-and-villainy/fang-fighter.json", "scum-and-villainy/firespray-class-patrol-craft.json", "scum-and-villainy/g-1a-starfighter.json", "scum-and-villainy/hwk-290-light-freighter.json", "scum-and-villainy/jumpmaster-5000.json", "scum-and-villainy/lancer-class-pursuit-craft.json", "scum-and-villainy/m3-a-interceptor.json", "scum-and-villainy/modified-tiener-freighter.json", "scum-and-villainy/quadrijet-transfer-spacetug.json", "scum-and-villainy/scavenged-yt-1300.json", "scum-and-villainy/starviper-class-attack-freighter.json", "scum-and-villainy/st-70-assault-ship.json", "scum-and-villainy/scurrg-h-6-bomber.json", "scum-and-villainy/tie-ln-fighter.json", "scum-and-villainy/yv-666-light-freighter.json", "scum-and-villainy/z-95-headhunter.json",
+
+        // FIRST ORDER (Primo Ordine)
+        "first-order/xi-class-light-shuttle.json", "first-order/tie-ba-interceptor.json", "first-order/tie-er-punisher.json", "first-order/tie-fo-fighter.json", "first-order/tie-sf-fighter.json", "first-order/tie-vn-silencer.json", "first-order/tie-wi-whisper-modified-interceptor.json", "first-order/upsilon-class-shuttle.json",
+
+        // RESISTANCE (Resistenza)
+        "resistance/fireball.json", "resistance/mg-1-starfortress", "resistance/scavenged-yt-1300.json", "resistance/t-70-x-wing.json", "resistance/rz-2-a-wing.json", "resistance/transport-pod.json", "resistance/resistance-transport.json",
+
+        // GALACTIC REPUBLIC (Repubblica)
+        "galactic-republic/arc-170-starfighter.json", "galactic-republic/eta-2-actis.json", "galactic-republic/naboo-royal-n-1-starfighter.json", "galactic-republic/btl-b-y-wing.json", "galactic-republic/v-19-torrent-starfighter.json", "galactic-republic/delta-7-aethersprite.json", "galactic-republic/delta-7b-aethersprite.json", "galactic-republic/laat-i-infantry-transport.json", "galactic-republic/cr90-corellian-corvette.json",
+
+        // SEPARATIST ALLIANCE (Separatisti)
+        "separatist-alliance/belbullab-22-starfighter.json", "separatist-alliance/hyena-class-droid-bomber.json", "separatist-alliance/nantex-class-territorial-defense-starfighter.json", "separatist-alliance/sith-infiltrator.json", "separatist-alliance/vulture-class-droid-fighter.json", "separatist-alliance/tri-fighter.json", "separatist-alliance/hmp-droid-gunship.json", "separatist-alliance/rogue-class-starfighter.json"
     ];
 
-    let database = { pilots: [], upgrades: {} };
+    let database = { pilots: [] };
     let currentSquad = [];
 
     const FACTION_NAMES = {
         "rebelalliance": "Ribelli (Rebel Alliance)",
         "galacticempire": "Impero Galattico (Galactic Empire)",
-        "scum": "Feccia e Malavita (Scum and Villainy)"
+        "scum": "Feccia e Malavita (Scum and Villainy)",
+        "firstorder": "Primo Ordine (First Order)",
+        "resistance": "Resistenza (Resistance)",
+        "galacticrepublic": "Repubblica Galattica (Galactic Republic)",
+        "separatistalliance": "Alleanza Separatista (Separatist Alliance)"
     };
 
     function getCustomCost(pilot) {
@@ -97,8 +116,10 @@
 
     async function loadDatabase() {
         let loadedCount = 0;
-        try {
-            for (const file of FILE_NAVI) {
+        
+        // Eseguiamo il caricamento asincrono massiccio in parallelo per non rallentare il browser
+        const fetchPromises = FILE_NAVI.map(async (file) => {
+            try {
                 const res = await fetch(BASE_DARKER_URL + file);
                 if (res.ok) {
                     const shipData = await res.json();
@@ -110,26 +131,49 @@
                                 faction: shipData.faction,
                                 ship: shipData.name,
                                 points: getCustomCost(p),
-                                slots: p.slots || [],
                                 initiative: p.initiative || 1
                             });
                         });
                         loadedCount++;
                     }
                 }
+            } catch (e) {
+                console.log("File non trovato o saltato: " + file);
             }
+        });
 
-            if (loadedCount > 0) {
-                document.getElementById('loading-msg').innerHTML = "✅ Database di Darker333 caricato con successo!";
-                renderFactions();
-            } else {
-                document.getElementById('loading-msg').innerHTML = "⚠️ Attenzione: Nessun file trovato. Controllare i nomi dei file o il link della repository di Darker333.";
-            }
-        } catch (error) {
-            console.error(error);
-            document.getElementById('loading-msg').innerHTML = "⚠️ Errore di connessione con la repository di Darker333.";
+        await Promise.all(fetchPromises);
+
+        if (database.pilots.length > 0) {
+            document.getElementById('loading-msg').innerHTML = `✅ Flotta caricata con successo! Inseriti oltre ${database.pilots.length} piloti dalle configurazioni di Darker333.`;
+            generateFactionFilters();
+            renderFactions();
+        } else {
+            document.getElementById('loading-msg').innerHTML = "⚠️ Errore critico: Impossibile leggere i file della repo.";
         }
     }
+
+    function generateFactionFilters() {
+        const filtersDiv = document.getElementById('faction-filters');
+        filtersDiv.innerHTML = '<button class="btn btn-outline-warning btn-sm filter-btn fw-bold" onclick="filterFaction(\'all\')">MOSTRA TUTTE</button>';
+        
+        const activeFactions = [...new Set(database.pilots.map(p => p.faction))];
+        activeFactions.forEach(fId => {
+            const name = FACTION_NAMES[fId] || fId;
+            filtersDiv.innerHTML += `<button class="btn btn-outline-secondary btn-sm filter-btn text-white" onclick="filterFaction('${fId}')">${name}</button>`;
+        });
+    }
+
+    window.filterFaction = function(factionId) {
+        const headers = document.querySelectorAll('.faction-section');
+        headers.forEach(el => {
+            if (factionId === 'all' || el.id === `sec-${factionId}`) {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        });
+    };
 
     function renderFactions() {
         const container = document.getElementById('factions-container');
@@ -141,8 +185,13 @@
             const factionPilots = database.pilots.filter(p => p.faction === factionId);
             const factionName = FACTION_NAMES[factionId] || factionId;
 
-            let factionHtml = `<h2 class="faction-header">${factionName}</h2><div class="row">`;
-            factionPilots.sort((a, b) => b.initiative - a.initiative);
+            let factionHtml = `<div class="faction-section" id="sec-${factionId}"><h2 class="faction-header">${factionName}</h2><div class="row">`;
+            
+            // Ordiniamo prima per nave, poi per iniziativa decrescente
+            factionPilots.sort((a, b) => {
+                if (a.ship !== b.ship) return a.ship.localeCompare(b.ship);
+                return b.initiative - a.initiative;
+            });
 
             factionPilots.forEach(pilot => {
                 const index = database.pilots.indexOf(pilot);
@@ -150,7 +199,7 @@
                     <div class="col-sm-6 col-lg-4">
                         <div class="card-custom shadow-sm">
                             <div class="d-flex justify-content-between align-items-start">
-                                <h6 class="mb-1 text-white fw-bold">(${pilot.initiative}) ${pilot.name}</h6>
+                                <h6 class="mb-1 text-white fw-bold" style="font-size:0.85rem;">(${pilot.initiative}) ${pilot.name}</h6>
                                 <span class="badge badge-points">${pilot.points} pt</span>
                             </div>
                             <p class="pilot-ship-name mb-2">${pilot.ship}</p>
@@ -160,7 +209,7 @@
                 `;
             });
 
-            factionHtml += `</div>`;
+            factionHtml += `</div></div>`;
             container.innerHTML += factionHtml;
         });
     }
