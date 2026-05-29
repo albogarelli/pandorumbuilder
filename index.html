@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Wing Squad Builder - Pandorum Complete</title>
+    <title>X-Wing Squad Builder - Pandorum Ultimate</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .card-custom { background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; margin-bottom: 15px; padding: 15px; }
         .badge-points { background-color: #ffc107; color: #000; font-weight: bold; font-size: 0.9rem; }
-        .faction-header { border-bottom: 2px solid #ffc107; padding-bottom: 10px; margin-top: 35px; margin-bottom: 20px; color: #ffc107; text-transform: uppercase; font-size: 1.5rem; fw-bold; }
+        .faction-header { border-bottom: 2px solid #ffc107; padding-bottom: 10px; margin-top: 25px; margin-bottom: 20px; color: #ffc107; text-transform: uppercase; font-size: 1.5rem; font-weight: bold; }
         .btn-add { background-color: #198754; color: white; border: none; }
         .btn-add:hover { background-color: #157347; color: white; }
         .squad-list { background-color: #1a1a1a; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; position: sticky; top: 20px; }
         .loading-status { color: #ffc107; font-style: italic; margin-bottom: 15px; font-size: 1.2rem; }
         .pilot-ship-name { color: #aaa; font-size: 0.85rem; font-style: italic; }
-        .filter-btn { margin-right: 5px; margin-bottom: 5px; font-size: 0.85rem; }
+        .filter-btn { margin-right: 5px; margin-bottom: 5px; font-size: 0.85rem; fw-bold; }
+        .ship-filter-container { background-color: #1c1c1c; padding: 10px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #2a2a2a; }
     </style>
 </head>
 <body>
@@ -27,15 +28,25 @@
             <p class="lead text-muted">Database Totale di Darker333 + Bilanciamento di Pandorum</p>
             <div id="loading-msg" class="loading-status">Inizializzazione flotta galattica (Caricamento di circa 100 file)...</div>
             
-            <!-- Pulsanti per saltare rapidamente alle fazioni -->
+            <!-- Menu Principale: FAZIONI -->
             <div class="mt-3" id="faction-filters"></div>
+        </div>
+    </div>
+
+    <!-- Sottomenu: TIPI DI NAVE (Compare dinamicamente) -->
+    <div class="row d-none" id="ship-filters-row">
+        <div class="col-12">
+            <div class="ship-filter-container">
+                <span class="text-warning small d-block mb-2 fw-bold text-uppercase">Filtra per Tipo di Nave:</span>
+                <div id="ship-filters"></div>
+            </div>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-8">
             <div id="factions-container">
-                <!-- Qui compariranno automaticamente TUTTE le navi del gioco -->
+                <!-- Qui compariranno automaticamente le navi filtrate -->
             </div>
         </div>
 
@@ -59,18 +70,14 @@
     // ==========================================
     // ✍️ SEZIONE PERSONALIZZAZIONE PUNTI DI PANDORUM
     // ==========================================
-    // Qui puoi sovrascrivere QUALSIASI costo inserito da Darker333.
-    // Inserisci l'ID (xws) del pilota tutto minuscolo e senza spazi, seguito dai tuoi punti.
     const I_MIEI_PUNTI = {
         "lukeskywalker": 53,
         "wedgeantilles": 54,
         "darthvader": 65
-        // Aggiungi qui sotto tutti i piloti che vuoi modificare, separati da una virgola!
     };
 
     const BASE_DARKER_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/pilots/";
 
-    // ELENCO COMPLETO DI TUTTI I ~100 FILE DELLA REPOSITORY DI DARKER333
     const FILE_NAVI = [
         // REBEL ALLIANCE (Ribelli)
         "rebel-alliance/a-uzit-gauntlet-fighter.json", "rebel-alliance/arc-170-starfighter.json", "rebel-alliance/attack-shuttle.json", "rebel-alliance/auzituck-gunship.json", "rebel-alliance/bwing-e2.json", "rebel-alliance/btl-a4-y-wing.json", "rebel-alliance/btl-s8-k-wing.json", "rebel-alliance/cr90-corellian-corvette.json", "rebel-alliance/e-wing.json", "rebel-alliance/fang-fighter.json", "rebel-alliance/gr-75-medium-transport.json", "rebel-alliance/hwk-290-light-freighter.json", "rebel-alliance/modified-yt-1300.json", "rebel-alliance/rz-1-a-wing.json", "rebel-alliance/sheathipede-class-shuttle.json", "rebel-alliance/t-65-x-wing.json", "rebel-alliance/tie-ln-fighter.json", "rebel-alliance/u-wing.json", "rebel-alliance/vcx-100-light-freighter.json", "rebel-alliance/v-wing.json", "rebel-alliance/yt-2400-light-freighter.json", "rebel-alliance/z-95-headhunter.json",
@@ -85,7 +92,7 @@
         "first-order/xi-class-light-shuttle.json", "first-order/tie-ba-interceptor.json", "first-order/tie-er-punisher.json", "first-order/tie-fo-fighter.json", "first-order/tie-sf-fighter.json", "first-order/tie-vn-silencer.json", "first-order/tie-wi-whisper-modified-interceptor.json", "first-order/upsilon-class-shuttle.json",
 
         // RESISTANCE (Resistenza)
-        "resistance/fireball.json", "resistance/mg-1-starfortress", "resistance/scavenged-yt-1300.json", "resistance/t-70-x-wing.json", "resistance/rz-2-a-wing.json", "resistance/transport-pod.json", "resistance/resistance-transport.json",
+        "resistance/fireball.json", "resistance/mg-1-starfortress.json", "resistance/scavenged-yt-1300.json", "resistance/t-70-x-wing.json", "resistance/rz-2-a-wing.json", "resistance/transport-pod.json", "resistance/resistance-transport.json",
 
         // GALACTIC REPUBLIC (Repubblica)
         "galactic-republic/arc-170-starfighter.json", "galactic-republic/eta-2-actis.json", "galactic-republic/naboo-royal-n-1-starfighter.json", "galactic-republic/btl-b-y-wing.json", "galactic-republic/v-19-torrent-starfighter.json", "galactic-republic/delta-7-aethersprite.json", "galactic-republic/delta-7b-aethersprite.json", "galactic-republic/laat-i-infantry-transport.json", "galactic-republic/cr90-corellian-corvette.json",
@@ -96,15 +103,17 @@
 
     let database = { pilots: [] };
     let currentSquad = [];
+    let currentFactionFilter = "all";
+    let currentShipFilter = "all";
 
     const FACTION_NAMES = {
         "rebelalliance": "Ribelli (Rebel Alliance)",
         "galacticempire": "Impero Galattico (Galactic Empire)",
-        "scum": "Feccia e Malavita (Scum and Villainy)",
+        "scum": "Feccia e Malavita (Scum)",
         "firstorder": "Primo Ordine (First Order)",
         "resistance": "Resistenza (Resistance)",
-        "galacticrepublic": "Repubblica Galattica (Galactic Republic)",
-        "separatistalliance": "Alleanza Separatista (Separatist Alliance)"
+        "galacticrepublic": "Repubblica Galattica (Republic)",
+        "separatistalliance": "Alleanza Separatista (Separatists)"
     };
 
     function getCustomCost(pilot) {
@@ -115,9 +124,6 @@
     }
 
     async function loadDatabase() {
-        let loadedCount = 0;
-        
-        // Eseguiamo il caricamento asincrono massiccio in parallelo per non rallentare il browser
         const fetchPromises = FILE_NAVI.map(async (file) => {
             try {
                 const res = await fetch(BASE_DARKER_URL + file);
@@ -134,60 +140,101 @@
                                 initiative: p.initiative || 1
                             });
                         });
-                        loadedCount++;
                     }
                 }
-            } catch (e) {
-                console.log("File non trovato o saltato: " + file);
-            }
+            } catch (e) {}
         });
 
         await Promise.all(fetchPromises);
 
         if (database.pilots.length > 0) {
-            document.getElementById('loading-msg').innerHTML = `✅ Flotta caricata con successo! Inseriti oltre ${database.pilots.length} piloti dalle configurazioni di Darker333.`;
+            document.getElementById('loading-msg').innerHTML = `✅ Flotta caricata con successo! Inseriti ${database.pilots.length} piloti da Darker333.`;
             generateFactionFilters();
             renderFactions();
         } else {
-            document.getElementById('loading-msg').innerHTML = "⚠️ Errore critico: Impossibile leggere i file della repo.";
+            document.getElementById('loading-msg').innerHTML = "⚠️ Errore critico nel caricamento.";
         }
     }
 
     function generateFactionFilters() {
         const filtersDiv = document.getElementById('faction-filters');
-        filtersDiv.innerHTML = '<button class="btn btn-outline-warning btn-sm filter-btn fw-bold" onclick="filterFaction(\'all\')">MOSTRA TUTTE</button>';
+        filtersDiv.innerHTML = '<button class="btn btn-warning btn-sm filter-btn fw-bold" id="btn-f-all" onclick="filterFaction(\'all\')">MOSTRA TUTTE</button>';
         
         const activeFactions = [...new Set(database.pilots.map(p => p.faction))];
         activeFactions.forEach(fId => {
             const name = FACTION_NAMES[fId] || fId;
-            filtersDiv.innerHTML += `<button class="btn btn-outline-secondary btn-sm filter-btn text-white" onclick="filterFaction('${fId}')">${name}</button>`;
+            filtersDiv.innerHTML += `<button class="btn btn-outline-secondary btn-sm filter-btn text-white" id="btn-f-${fId}" onclick="filterFaction('${fId}')">${name}</button>`;
         });
     }
 
     window.filterFaction = function(factionId) {
-        const headers = document.querySelectorAll('.faction-section');
-        headers.forEach(el => {
-            if (factionId === 'all' || el.id === `sec-${factionId}`) {
-                el.style.display = 'block';
-            } else {
-                el.style.display = 'none';
-            }
+        currentFactionFilter = factionId;
+        currentShipFilter = "all"; // Resetta il filtro nave quando cambi fazione
+        
+        // Aggiorna lo stile dei pulsanti fazione
+        document.querySelectorAll('#faction-filters .btn').forEach(btn => btn.classList.replace('btn-warning', 'btn-outline-secondary'));
+        document.getElementById(`btn-f-${factionId}`).classList.remove('btn-outline-secondary');
+        document.getElementById(`btn-f-${factionId}`).classList.add('btn-warning');
+
+        generateShipFilters(factionId);
+        renderFactions();
+    };
+
+    function generateShipFilters(factionId) {
+        const row = document.getElementById('ship-filters-row');
+        const container = document.getElementById('ship-filters');
+        
+        if (factionId === 'all') {
+            row.classList.add('d-none');
+            return;
+        }
+        
+        row.classList.remove('d-none');
+        container.innerHTML = '<button class="btn btn-warning btn-sm filter-btn fw-bold" id="btn-s-all" onclick="filterShip(\'all\')">TUTTE LE NAVI</button>';
+        
+        // Prende solo le navi effettivamente presenti in questa fazione
+        const factionPilots = database.pilots.filter(p => p.faction === factionId);
+        const ships = [...new Set(factionPilots.map(p => p.ship))].sort();
+        
+        ships.forEach(shipName => {
+            const cleanId = shipName.replace(/[^a-zA-Z0-9]/g, "");
+            container.innerHTML += `<button class="btn btn-outline-light btn-sm filter-btn" id="btn-s-${cleanId}" onclick="filterShip('${shipName}')">${shipName}</button>`;
         });
+    }
+
+    window.filterShip = function(shipName) {
+        currentShipFilter = shipName;
+
+        // Aggiorna grafica pulsanti nave
+        document.querySelectorAll('#ship-filters .btn').forEach(btn => btn.classList.replace('btn-warning', 'btn-outline-light'));
+        const cleanId = shipName === 'all' ? 'all' : shipName.replace(/[^a-zA-Z0-9]/g, "");
+        document.getElementById(`btn-s-${cleanId}`).classList.remove('btn-outline-light');
+        document.getElementById(`btn-s-${cleanId}`).classList.add('btn-warning');
+
+        renderFactions();
     };
 
     function renderFactions() {
         const container = document.getElementById('factions-container');
         container.innerHTML = "";
 
-        const factions = [...new Set(database.pilots.map(p => p.faction))];
+        // Applica i filtri combinati
+        let filteredPilots = database.pilots;
+        if (currentFactionFilter !== 'all') {
+            filteredPilots = filteredPilots.filter(p => p.faction === currentFactionFilter);
+        }
+        if (currentShipFilter !== 'all') {
+            filteredPilots = filteredPilots.filter(p => p.ship === currentShipFilter);
+        }
+
+        const factions = [...new Set(filteredPilots.map(p => p.faction))];
 
         factions.forEach(factionId => {
-            const factionPilots = database.pilots.filter(p => p.faction === factionId);
+            const factionPilots = filteredPilots.filter(p => p.faction === factionId);
             const factionName = FACTION_NAMES[factionId] || factionId;
 
-            let factionHtml = `<div class="faction-section" id="sec-${factionId}"><h2 class="faction-header">${factionName}</h2><div class="row">`;
+            let factionHtml = `<div class="faction-section"><h2 class="faction-header">${factionName}</h2><div class="row">`;
             
-            // Ordiniamo prima per nave, poi per iniziativa decrescente
             factionPilots.sort((a, b) => {
                 if (a.ship !== b.ship) return a.ship.localeCompare(b.ship);
                 return b.initiative - a.initiative;
@@ -216,11 +263,7 @@
 
     window.addPilotToSquad = function(index) {
         const pilot = database.pilots[index];
-        const squadItem = {
-            ...pilot,
-            uniqueId: Date.now() + Math.random()
-        };
-        currentSquad.push(squadItem);
+        currentSquad.push({...pilot, uniqueId: Date.now() + Math.random()});
         updateSquadUI();
     };
 
@@ -250,7 +293,7 @@
                         <span class="text-white fw-bold" style="font-size:0.9rem;">${pilot.name}</span>
                         <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:0.7rem;" onclick="removePilot(${pilot.uniqueId})">X</button>
                     </div>
-                    <small class="text-warning" style="font-size:0.75rem;">${pilot.points} pt</small>
+                    <small class="text-warning" style="font-size:0.75rem;">${pilot.points} pt (${pilot.ship})</small>
                 </div>
             `;
         });
