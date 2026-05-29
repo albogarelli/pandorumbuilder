@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Wing Squad Builder - Pandorum Pro Ultimate</title>
+    <title>X-Wing Squad Builder - Pandorum Pro Tournament</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -30,8 +30,8 @@
     <div class="row">
         <div class="col-12 text-center mb-4">
             <h1 class="display-5 text-warning fw-bold">X-Wing Squad Builder</h1>
-            <p class="lead text-muted">Versione Corretta: Restrizioni Reali & Database 100% Completo</p>
-            <div id="loading-msg" class="loading-status">Scansione e caricamento di tutti i 103 file di Darker333...</div>
+            <p class="lead text-muted">Controllo Unicità Totale (Pilota/Crew) & Restrizioni Copertura Rigida</p>
+            <div id="loading-msg" class="loading-status">Caricamento dell'intera flotta galattica...</div>
             <div class="mt-3" id="faction-filters"></div>
         </div>
     </div>
@@ -67,9 +67,6 @@
 </div>
 
 <script>
-    // ==========================================
-    // ✍️ SEZIONE PERSONALIZZAZIONE PUNTI DI PANDORUM
-    // ==========================================
     const I_MIEI_PUNTI = {
         "lukeskywalker": 53,
         "darthvader": 65
@@ -77,21 +74,18 @@
 
     const BASE_DARKER_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/";
 
-    // RICOGNIZIONE TOTALMENTE COMPLETA: TUTTI I FILE DELLA REPO DI DARKER
     const FILE_NAVI = [
-        // REBEL ALLIANCE (22 File)
+        // REBEL ALLIANCE (Tutte incluse, Falcon YT-1300 inclusa)
         "pilots/rebel-alliance/a-uzit-gauntlet-fighter.json", "pilots/rebel-alliance/arc-170-starfighter.json", "pilots/rebel-alliance/attack-shuttle.json", "pilots/rebel-alliance/auzituck-gunship.json", "pilots/rebel-alliance/b-wing.json", "pilots/rebel-alliance/btl-a4-y-wing.json", "pilots/rebel-alliance/btl-s8-k-wing.json", "pilots/rebel-alliance/cr90-corellian-corvette.json", "pilots/rebel-alliance/e-wing.json", "pilots/rebel-alliance/fang-fighter.json", "pilots/rebel-alliance/gr-75-medium-transport.json", "pilots/rebel-alliance/hwk-290-light-freighter.json", "pilots/rebel-alliance/modified-yt-1300.json", "pilots/rebel-alliance/rz-1-a-wing.json", "pilots/rebel-alliance/sheathipede-class-shuttle.json", "pilots/rebel-alliance/t-65-x-wing.json", "pilots/rebel-alliance/tie-ln-fighter.json", "pilots/rebel-alliance/u-wing.json", "pilots/rebel-alliance/vcx-100-light-freighter.json", "pilots/rebel-alliance/v-wing.json", "pilots/rebel-alliance/yt-2400-light-freighter.json", "pilots/rebel-alliance/z-95-headhunter.json",
-        // GALACTIC EMPIRE (21 File)
+        // GALACTIC EMPIRE (Incluso Decimator e caccia speciali)
         "pilots/galactic-empire/a-uzit-gauntlet-fighter.json", "pilots/galactic-empire/alpha-class-star-wing.json", "pilots/galactic-empire/firespray-class-patrol-craft.json", "pilots/galactic-empire/gozanti-class-cruiser.json", "pilots/galactic-empire/lambda-class-t-4a-shuttle.json", "pilots/galactic-empire/raider-class-corvette.json", "pilots/galactic-empire/tie-advanced-v1.json", "pilots/galactic-empire/tie-advanced-x1.json", "pilots/galactic-empire/tie-ag-aggressor.json", "pilots/galactic-empire/tie-ca-punisher.json", "pilots/galactic-empire/tie-d-defender.json", "pilots/galactic-empire/tie-in-interceptor.json", "pilots/galactic-empire/tie-ln-fighter.json", "pilots/galactic-empire/tie-ph-phantom.json", "pilots/galactic-empire/tie-rb-heavy.json", "pilots/galactic-empire/tie-reaper.json", "pilots/galactic-empire/tie-sa-bomber.json", "pilots/galactic-empire/tie-sk-striker.json", "pilots/galactic-empire/tie-v1-assault-shuttle.json", "pilots/galactic-empire/tie-vn-silencer.json", "pilots/galactic-empire/vt-49-decimator.json",
-        // SCUM AND VILLAINY (22 File)
+        // SCUM AND VILLAINY (Incluso Falcon personalizzato, Firespray, ecc.)
         "pilots/scum-and-villainy/a-uzit-gauntlet-fighter.json", "pilots/scum-and-villainy/aggressor-assault-fighter.json", "pilots/scum-and-villainy/btl-a4-y-wing.json", "pilots/scum-and-villainy/croc-class-light-cruiser.json", "pilots/scum-and-villainy/customized-yt-1300.json", "pilots/scum-and-villainy/escape-craft.json", "pilots/scum-and-villainy/fang-fighter.json", "pilots/scum-and-villainy/firespray-class-patrol-craft.json", "pilots/scum-and-villainy/g-1a-starfighter.json", "pilots/scum-and-villainy/hwk-290-light-freighter.json", "pilots/scum-and-villainy/jumpmaster-5000.json", "pilots/scum-and-villainy/lancer-class-pursuit-craft.json", "pilots/scum-and-villainy/m3-a-interceptor.json", "pilots/scum-and-villainy/modified-tiener-freighter.json", "pilots/scum-and-villainy/quadrijet-transfer-spacetug.json", "pilots/scum-and-villainy/scavenged-yt-1300.json", "pilots/scum-and-villainy/starviper-class-attack-freighter.json", "pilots/scum-and-villainy/st-70-assault-ship.json", "pilots/scum-and-villainy/scurrg-h-6-bomber.json", "pilots/scum-and-villainy/tie-ln-fighter.json", "pilots/scum-and-villainy/yv-666-light-freighter.json", "pilots/scum-and-villainy/z-95-headhunter.json",
-        // FIRST ORDER (8 File)
+        // FIRST ORDER & RESISTANCE
         "pilots/first-order/xi-class-light-shuttle.json", "pilots/first-order/tie-ba-interceptor.json", "pilots/first-order/tie-er-punisher.json", "pilots/first-order/tie-fo-fighter.json", "pilots/first-order/tie-sf-fighter.json", "pilots/first-order/tie-vn-silencer.json", "pilots/first-order/tie-wi-whisper-modified-interceptor.json", "pilots/first-order/upsilon-class-shuttle.json",
-        // RESISTANCE (7 File)
         "pilots/resistance/fireball.json", "pilots/resistance/mg-1-starfortress.json", "pilots/resistance/scavenged-yt-1300.json", "pilots/resistance/t-70-x-wing.json", "pilots/resistance/rz-2-a-wing.json", "pilots/resistance/transport-pod.json", "pilots/resistance/resistance-transport.json",
-        // GALACTIC REPUBLIC (9 File)
+        // REPUBLIC & SEPARATISTS
         "pilots/galactic-republic/arc-170-starfighter.json", "pilots/galactic-republic/eta-2-actis.json", "pilots/galactic-republic/naboo-royal-n-1-starfighter.json", "pilots/galactic-republic/btl-b-y-wing.json", "pilots/galactic-republic/v-19-torrent-starfighter.json", "pilots/galactic-republic/delta-7-aethersprite.json", "pilots/galactic-republic/delta-7b-aethersprite.json", "pilots/galactic-republic/laat-i-infantry-transport.json", "pilots/galactic-republic/cr90-corellian-corvette.json",
-        // SEPARATIST ALLIANCE (8 File)
         "pilots/separatist-alliance/belbullab-22-starfighter.json", "pilots/separatist-alliance/hyena-class-droid-bomber.json", "pilots/separatist-alliance/nantex-class-territorial-defense-starfighter.json", "pilots/separatist-alliance/sith-infiltrator.json", "pilots/separatist-alliance/vulture-class-droid-fighter.json", "pilots/separatist-alliance/tri-fighter.json", "pilots/separatist-alliance/hmp-droid-gunship.json", "pilots/separatist-alliance/rogue-class-starfighter.json"
     ];
 
@@ -114,11 +108,16 @@
         "firstorder": "Primo Ordine", "resistance": "Resistenza", "galacticrepublic": "Repubblica", "separatistalliance": "Separatisti"
     };
 
-    // Mappa per convertire i codici ID corti nei nomi completi usati dentro le restrizioni JSON delle migliorie
     const FACTION_MAP_REVERSE = {
         "rebelalliance": "Rebel Alliance", "galacticempire": "Galactic Empire", "scum": "Scum and Villainy",
         "firstorder": "First Order", "resistance": "Resistance", "galacticrepublic": "Galactic Republic", "separatistalliance": "Separatist Alliance"
     };
+
+    // Estrae la radice pura del nome per controllare l'unicità (es: "lukeskywalker-t65" o "lukeskywalker-crew" -> "lukeskywalker")
+    function getCleanIdentity(xws) {
+        if (!xws) return "";
+        return xws.split('-')[0].replace(/[^a-z0-9]/g, "");
+    }
 
     function getCustomCost(item) {
         if (I_MIEI_PUNTI[item.xws] !== undefined) return I_MIEI_PUNTI[item.xws];
@@ -128,6 +127,7 @@
     }
 
     async function loadDatabase() {
+        // 1. Caricamento Upgrades con parsing delle restrizioni YASB nativo
         const upgradePromises = FILE_UPGRADES.map(async (file) => {
             try {
                 const res = await fetch(BASE_DARKER_URL + file);
@@ -166,6 +166,7 @@
             } catch (e) {}
         });
 
+        // 2. Caricamento Piloti e Unione Slot base Nave
         const pilotPromises = FILE_NAVI.map(async (file) => {
             try {
                 const res = await fetch(BASE_DARKER_URL + file);
@@ -200,28 +201,34 @@
         });
 
         await Promise.all([...upgradePromises, ...pilotPromises]);
-        document.getElementById('loading-msg').innerHTML = `✅ Database Totale Caricato! (${database.pilots.length} piloti inseriti).`;
+        document.getElementById('loading-msg').innerHTML = `✅ Database Aggiornato Caricato con Successo!`;
         generateFactionFilters();
         renderFactions();
     }
 
-    // Controllo Legale Rigoroso
-    function isUpgradeLegal(upgrade, pilot, currentPilotUniqueId, currentSlotType) {
-        // 1. Controllo Unicità Globale della carta
+    // CONTROLLO RESTRIZIONI LEGALE ASSOLUTO (Piloti, Crew, Unicità incrociata)
+    function isUpgradeLegal(upgrade, pilot, currentPilotUniqueId) {
+        const upgradeIdentity = getCleanIdentity(upgrade.xws);
+
+        // A. Controllo Unicità Incrociata (Se il personaggio è già usato come Pilota o come altra Crew)
         if (upgrade.limited > 0) {
-            const alreadyUsed = currentSquad.some(p => 
-                p.selectedUpgrades && Object.values(p.selectedUpgrades).some(u => u && u.xws === upgrade.xws && p.uniqueId !== currentPilotUniqueId)
+            // Verifica contro i piloti presenti in squadriglia
+            const usedAsPilot = currentSquad.some(p => getCleanIdentity(p.xws) === upgradeIdentity);
+            if (usedAsPilot) return false;
+
+            // Verifica contro le altre migliorie equipaggiate in tutta la lista
+            const usedAsUpgrade = currentSquad.some(p => 
+                p.selectedUpgrades && Object.values(p.selectedUpgrades).some(u => u && getCleanIdentity(u.xws) === upgradeIdentity && p.uniqueId !== currentPilotUniqueId)
             );
-            if (alreadyUsed) return false;
+            if (usedAsUpgrade) return false;
         }
 
-        // 2. Controllo Restrizioni di Fazione/Taglia/Nave specifiche per configurazioni e crew
+        // B. Controllo Rigido Fazione / Taglia / Tipo Nave (Risolve Yoda e le restrizioni scafo)
         if (upgrade.restrictions && upgrade.restrictions.length > 0) {
             for (const r of upgrade.restrictions) {
                 if (r.type === 'faction') {
-                    const legalFactionNames = r.values;
-                    const pilotFactionLongName = FACTION_MAP_REVERSE[pilot.faction];
-                    if (!legalFactionNames.includes(pilotFactionLongName)) return false;
+                    const mappedName = FACTION_MAP_REVERSE[pilot.faction];
+                    if (!r.values.includes(mappedName)) return false;
                 }
                 if (r.type === 'size' && !r.values.includes(pilot.shipSize)) return false;
                 if (r.type === 'ship' && !r.values.includes(pilot.shipXws)) return false;
@@ -284,16 +291,21 @@
             factionPilots.forEach(pilot => {
                 const index = database.pilots.indexOf(pilot);
                 
-                const isPilotUniqueAndUsed = pilot.limited > 0 && currentSquad.some(s => s.xws === pilot.xws);
+                // Controllo identità incrociata: non posso mettere Luke pilota se ho già Luke crew
+                const pilotIdentity = getCleanIdentity(pilot.xws);
+                const isIdentityUsedInCrew = currentSquad.some(p => 
+                    p.selectedUpgrades && Object.values(p.selectedUpgrades).some(u => u && getCleanIdentity(u.xws) === pilotIdentity)
+                );
+                const isPilotUniqueAndUsed = (pilot.limited > 0 && currentSquad.some(s => s.xws === pilot.xws)) || isIdentityUsedInCrew;
                 const isFactionWrong = lockedFaction !== null && lockedFaction !== pilot.faction;
 
                 let btnClass = "btn-add"; let btnAction = `onclick="addPilotToSquad(${index})"`; let btnText = "+ Aggiungi"; let subText = "";
 
                 if (isFactionWrong) {
-                    btnClass = "btn-disabled"; btnAction = ""; btnText = "Incompatibile";
-                    subText = `<div class="locked-faction-alert">Fazione bloccata su: ${FACTION_NAMES[lockedFaction]}</div>`;
+                    btnClass = "btn-disabled"; btnAction = ""; btnText = "Fazione Incompatibile";
+                    subText = `<div class="locked-faction-alert">Squadriglia vincolata a: ${FACTION_NAMES[lockedFaction]}</div>`;
                 } else if (isPilotUniqueAndUsed) {
-                    btnClass = "btn-disabled"; btnAction = ""; btnText = "Già in Squadra";
+                    btnClass = "btn-disabled"; btnAction = ""; btnText = "Incompatibile (Unico)";
                 }
 
                 factionHtml += `
@@ -318,14 +330,14 @@
         const pilot = database.pilots[index];
         if (currentSquad.length === 0) lockedFaction = pilot.faction;
 
-        // Creazione di una mappa di slot univoci con ID progressivi per gestire i modificatori slot in sicurezza
-        let initialSlots = {};
-        pilot.slots.forEach((slot, i) => { initialSlots[`slot_${i}`] = { type: slot, value: null }; });
+        // Inizializza la struttura base degli slot nativi
+        let baseSlots = {};
+        pilot.slots.forEach((slot, i) => { baseSlots[`slot_${i}`] = { type: slot, value: null }; });
 
         const squadItem = { 
             ...pilot, 
             uniqueId: Date.now() + Math.random(), 
-            selectedUpgrades: initialSlots 
+            selectedUpgrades: baseSlots 
         };
         currentSquad.push(squadItem);
         renderFactions(); updateSquadUI();
@@ -351,13 +363,13 @@
                 pilot.selectedUpgrades[slotKey].value = found;
             }
             
-            // PULIZIA E RICALCOLO DINAMICO DEGLI SLOT AGGIUNTIVI (Esempio: Imperial Super Commandos)
-            // 1. Eliminiamo i vecchi slot aggiuntivi dinamici creati precedentemente
+            // LOGICA DI RICALCOLO COMPLETO DEGLI SLOT (Risolve Imperial Super Commandos)
+            // 1. Eliminiamo i vecchi slot dinamici generati in precedenza per ricostruirli in modo pulito
             for (const key in pilot.selectedUpgrades) {
                 if (key.startsWith("dynamic_")) delete pilot.selectedUpgrades[key];
             }
 
-            // 2. Cerchiamo se ci sono modificatori attivi e iniettiamo i nuovi slot
+            // 2. Scansione a cascata: se una miglioria aggiunge o modifica slot, creiamo la nuova mappa
             let dynamicCounter = 0;
             Object.keys(pilot.selectedUpgrades).forEach(key => {
                 const up = pilot.selectedUpgrades[key].value;
@@ -370,6 +382,7 @@
                 }
             });
 
+            renderFactions(); // Forza il ricalcolo dei bottoni unici a sinistra
             updateSquadUI();
         }
     };
@@ -392,7 +405,7 @@
                 const currentSelected = pilot.selectedUpgrades[slotKey].value;
                 
                 const rawUpgrades = database.upgrades[slotType] || [];
-                const legalUpgrades = rawUpgrades.filter(up => isUpgradeLegal(up, pilot, pilot.uniqueId, slotType));
+                const legalUpgrades = rawUpgrades.filter(up => isUpgradeLegal(up, pilot, pilot.uniqueId));
                 
                 if (currentSelected) pilotTotalCost += currentSelected.points;
 
