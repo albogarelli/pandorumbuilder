@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Wing Squad Builder - Pandorum Engine</title>
+    <title>X-Wing Squad Builder - Pandorum Legacy Engine</title>
     <style>
         html, body {
             margin: 0;
@@ -43,7 +43,7 @@
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
-        @animation spin {
+        @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
@@ -53,18 +53,14 @@
 
 <div id="loading-overlay">
     <div class="spinner"></div>
-    <h2>Iniezione Motore YASB & Punti Darker333...</h2>
-    <p style="color: #aaa; font-style: italic;">Sincronizzazione regole da torneo e restrizioni avanzate</p>
+    <h2>Iniezione Motore X-Wing Legacy...</h2>
+    <p style="color: #aaa; font-style: italic;">Allineamento regole 2.0 Legacy e restrizioni avanzate</p>
 </div>
 
-<!-- L'applicazione viene caricata dentro un contesto isolato ma controllato -->
-<iframe id="yasb-container" src="https://yasb.app/?f=Rebel%20Alliance&p=20&a=0" title="X-Wing Squad Builder"></iframe>
+<!-- Collegamento diretto al VERO motore ufficiale di X-Wing Legacy -->
+<iframe id="yasb-container" src="https://xwing-legacy.com/" title="X-Wing Legacy Squad Builder"></iframe>
 
 <script>
-    // ==========================================
-    // ✍️ SEZIONE PERSONALIZZAZIONE PUNTI DI PANDORUM
-    // ==========================================
-    // Se vuoi ritoccare ulteriormente i punti di Darker333, puoi farlo qui.
     const LE_MIE_MODIFICHE = {
         "lukeskywalker": 53,
         "darthvader": 65
@@ -73,34 +69,24 @@
     const BASE_DARKER_DATA_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/";
     const iframe = document.getElementById('yasb-container');
 
-    // Funzione per intercettare il caricamento del motore e forzare i dati personalizzati
-    iframe.onload = async function() {
-        try {
-            // Rimuove la schermata di caricamento appena il motore è pronto
-            setTimeout(() => {
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) {
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.remove(), 500);
-                }
-            }, 1000);
+    iframe.onload = function() {
+        setTimeout(() => {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 500);
+            }
+        }, 1200);
 
-            // Comunicazione con il core di YASB per l'aggiornamento dinamico dei vettori dei costi
-            // Leggiamo la struttura dei piloti direttamente dal file dei punti centralizzato di Darker se presente, 
-            // altrimenti forziamo la sovrascrittura a runtime nel local storage dell'applicazione
-            
-            // Inviamo un payload di configurazione all'istanza del builder
+        try {
             const configPayload = {
                 source: "pandorum-builder",
                 customPoints: LE_MIE_MODIFICHE,
                 dataSource: BASE_DARKER_DATA_URL
             };
-
-            // Configurazione delle opzioni di memorizzazione locale per forzare YASB a usare i dati Legacy modificati
             iframe.contentWindow.postMessage(JSON.stringify(configPayload), "*");
-            
         } catch (error) {
-            console.error("Errore durante l'iniezione del motore dei punti:", error);
+            console.error("Errore di sincronizzazione dei punti:", error);
         }
     };
 </script>
