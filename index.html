@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Wing Squad Builder - Pandorum Legacy Engine</title>
+    <title>X-Wing Squad Builder - Pandorum Custom Legacy</title>
     <style>
         html, body {
             margin: 0;
@@ -12,84 +12,18 @@
             height: 100%;
             background-color: #121212;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         #yasb-container {
             width: 100%;
             height: 100%;
             border: none;
         }
-        #loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #121212;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            color: #ffc107;
-            transition: opacity 0.5s ease;
-        }
-        .spinner {
-            border: 4px solid rgba(255, 193, 7, 0.1);
-            width: 50px;
-            height: 50px;
-            border-left-color: #ffc107;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
 
-<div id="loading-overlay">
-    <div class="spinner"></div>
-    <h2>Iniezione Motore X-Wing Legacy...</h2>
-    <p style="color: #aaa; font-style: italic;">Allineamento regole 2.0 Legacy e restrizioni avanzate</p>
-</div>
-
-<!-- Collegamento diretto al VERO motore ufficiale di X-Wing Legacy -->
-<iframe id="yasb-container" src="https://xwing-legacy.com/" title="X-Wing Legacy Squad Builder"></iframe>
-
-<script>
-    const LE_MIE_MODIFICHE = {
-        "lukeskywalker": 53,
-        "darthvader": 99
-    };
-
-    const BASE_DARKER_DATA_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/";
-    const iframe = document.getElementById('yasb-container');
-
-    iframe.onload = function() {
-        setTimeout(() => {
-            const overlay = document.getElementById('loading-overlay');
-            if (overlay) {
-                overlay.style.opacity = '0';
-                setTimeout(() => overlay.remove(), 500);
-            }
-        }, 1200);
-
-        try {
-            const configPayload = {
-                source: "pandorum-builder",
-                customPoints: LE_MIE_MODIFICHE,
-                dataSource: BASE_DARKER_DATA_URL
-            };
-            iframe.contentWindow.postMessage(JSON.stringify(configPayload), "*");
-        } catch (error) {
-            console.error("Errore di sincronizzazione dei punti:", error);
-        }
-    };
-</script>
+<!-- Carichiamo il motore passandogli la repo di Darker DIRETTAMENTE come sorgente dati ufficiale nell'URL -->
+<iframe id="yasb-container" src="https://xwing-legacy.com/?data=https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/" title="X-Wing Legacy Squad Builder"></iframe>
 
 </body>
 </html>
