@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Wing Squad Builder - Pandorum Ultimate</title>
+    <title>X-Wing Squad Builder - Pandorum & Darker Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -24,8 +24,8 @@
     <div class="row">
         <div class="col-12 text-center mb-4">
             <h1 class="display-5 text-warning fw-bold">X-Wing Squad Builder</h1>
-            <p class="lead text-muted">Sincronizzato con SogeMoge & Personalizzato da Pandorum</p>
-            <div id="loading-msg" class="loading-status">Connessione al database di SogeMoge in corso...</div>
+            <p class="lead text-muted">Punti aggiornati da Darker333 + Ritocchi di Pandorum</p>
+            <div id="loading-msg" class="loading-status">Connessione al database di Darker333 in corso...</div>
         </div>
     </div>
 
@@ -53,106 +53,80 @@
 
 <script>
     // ==========================================
-    // ✍️ INSERISCI QUI I TUOI PUNTI PERSONALIZZATI
+    // ✍️ QUI METTI SOLO LE TUE MODIFICHE PERSONALI
     // ==========================================
-    // Inserisci l'id del pilota (o della miglioria) in minuscolo e senza spazi, seguito dai nuovi punti.
-    // Esempio: "lukeskywalker": 55, "darthvader": 72
+    // Se un punto di Darker non ti piace, lo sovrascrivi qui. Altrimenti lascialo vuoto {}.
     const I_MIEI_PUNTI = {
-        "lukeskywalker": 58, 
-        "darthvader": 70,
-        "protontorpedoes": 10
+        "lukeskywalker": 53 // Esempio: se Darker lo ha messo a 59 e tu lo vuoi a 53
     };
 
-    // Configurazione sorgenti di SogeMoge
-    const BASE_RAW_URL = "https://raw.githubusercontent.com/SogeMoge/xwing-data2-legacy/master/data/";
-    
-    // Lista delle fazioni standard da caricare
-    const FACTION_FILES = [
-        { id: "rebelalliance", name: "Ribelli (Rebel Alliance)", file: "pilots/rebel-alliance.json" },
-        { id: "galacticempire", name: "Impero Galattico (Galactic Empire)", file: "pilots/galactic-empire.json" },
-        { id: "scandvillainy", name: "Feccia e Malavita (Scum and Villainy)", file: "pilots/scum-and-villainy.json" }
-    ];
+    // Il link "Raw" che punta alla cartella pilots dentro la repository di Darker333
+    const BASE_DARKER_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/pilots/";
 
-    const UPGRADE_FILES = [
-        "upgrades/talent.json",
-        "upgrades/torpedo.json",
-        "upgrades/astromech.json",
-        "upgrades/missile.json",
-        "upgrades/crew.json",
-        "upgrades/sensor.json",
-        "upgrades/modification.json"
+    // Lista esatta dei file delle navi dei Ribelli e dell'Impero presenti da Darker
+    // Il sistema li scaricherà tutti in un colpo solo da internet!
+    const FILE_NAVI = [
+        // Ribelli
+        "rebel-alliance/t-65-x-wing.json",
+        "rebel-alliance/btl-a4-y-wing.json",
+        "rebel-alliance/rz-1-a-wing.json",
+        "rebel-alliance/modified-yt-1300.json",
+        // Impero
+        "galactic-empire/tie-ln-fighter.json",
+        "galactic-empire/tie-in-interceptor.json",
+        "galactic-empire/tie-advanced-x1.json",
+        "galactic-empire/firespray-class-patrol-craft.json"
     ];
 
     let database = { pilots: [], upgrades: {} };
     let currentSquad = [];
 
-    // Funzione per ripulire i testi e accoppiarli con la tua tabella punti
-    function getCustomCost(item) {
-        const cleanId = item.id || item.name.toLowerCase().replace(/[^a-z0-9]/g, "");
-        if (I_MIEI_PUNTI[cleanId] !== undefined) {
-            return I_MIEI_PUNTI[cleanId]; // Usa il tuo punto modificato
+    const FACTION_NAMES = {
+        "rebelalliance": "Ribelli (Rebel Alliance)",
+        "galacticempire": "Impero Galattico (Galactic Empire)",
+        "scum": "Feccia e Malavita (Scum and Villainy)"
+    };
+
+    function getCustomCost(pilot) {
+        if (I_MIEI_PUNTI[pilot.xws] !== undefined) {
+            return I_MIEI_PUNTI[pilot.xws];
         }
-        return item.cost || item.points || 0; // Usa il punto originale di Soge
+        return pilot.cost || 0;
     }
 
     async function loadDatabase() {
+        let loadedCount = 0;
         try {
-            // 1. Carichiamo i Piloti dalle fazioni
-            for (const faction of FACTION_FILES) {
-                const res = await fetch(BASE_RAW_URL + faction.file);
+            for (const file di FILE_NAVI) {
+                const res = await fetch(BASE_DARKER_URL + file);
                 if (res.ok) {
-                    const ships = await res.json();
-                    // Struttura xwing-data2: i piloti sono dentro le navi (ships)
-                    ships.forEach(ship => {
-                        if (ship.pilots) {
-                            ship.pilots.forEach(p => {
-                                database.pilots.push({
-                                    name: p.name,
-                                    id: p.id || p.name.toLowerCase().replace(/[^a-z0-9]/g, ""),
-                                    faction: faction.id,
-                                    ship: ship.name,
-                                    points: getCustomCost(p),
-                                    slots: p.slots || []
-                                });
+                    const shipData = await res.json();
+                    if (shipData.pilots) {
+                        shipData.pilots.forEach(p => {
+                            database.pilots.push({
+                                name: p.name,
+                                xws: p.xws,
+                                faction: shipData.faction,
+                                ship: shipData.name,
+                                points: getCustomCost(p),
+                                slots: p.slots || [],
+                                initiative: p.initiative || 1
                             });
-                        }
-                    });
-                }
-            }
-
-            // 2. Carichiamo le Migliorie (Upgrades)
-            for (const upFile of UPGRADE_FILES) {
-                const res = await fetch(BASE_RAW_URL + upFile);
-                if (res.ok) {
-                    const upgradesList = await res.json();
-                    upgradesList.forEach(up => {
-                        const slotType = up.sides[0].type;
-                        if (!database.upgrades[slotType]) {
-                            database.upgrades[slotType] = [];
-                        }
-                        
-                        // Gestione costo fisso o variabile
-                        let calculatedCost = 0;
-                        if (up.cost && up.cost.value !== undefined) {
-                            calculatedCost = up.cost.value;
-                        } else if (typeof up.cost === 'number') {
-                            calculatedCost = up.cost;
-                        }
-
-                        database.upgrades[slotType].push({
-                            name: up.name,
-                            id: up.id || up.name.toLowerCase().replace(/[^a-z0-9]/g, ""),
-                            points: I_MIEI_PUNTI[up.id] !== undefined ? I_MIEI_PUNTI[up.id] : calculatedCost
                         });
-                    });
+                        loadedCount++;
+                    }
                 }
             }
 
-            document.getElementById('loading-msg').innerHTML = "✅ Database SogeMoge caricato e personalizzato con i tuoi punti!";
-            renderFactions();
+            if (loadedCount > 0) {
+                document.getElementById('loading-msg').innerHTML = "✅ Database di Darker333 caricato con successo!";
+                renderFactions();
+            } else {
+                document.getElementById('loading-msg').innerHTML = "⚠️ Attenzione: Nessun file trovato. Verificare i percorsi della repository.";
+            }
         } catch (error) {
             console.error(error);
-            document.getElementById('loading-msg').innerHTML = "⚠️ Errore nel caricamento online. Verifica la connessione.";
+            document.getElementById('loading-msg').innerHTML = "⚠️ Errore di connessione con la repository di Darker333.";
         }
     }
 
@@ -160,19 +134,22 @@
         const container = document.getElementById('factions-container');
         container.innerHTML = "";
 
-        FACTION_FILES.forEach(faction => {
-            const factionPilots = database.pilots.filter(p => p.faction === faction.id);
-            if (factionPilots.length === 0) return;
+        const factions = [...new Set(database.pilots.map(p => p.faction))];
 
-            let factionHtml = `<h2 class="faction-header">${faction.name}</h2><div class="row">`;
-            
+        factions.forEach(factionId => {
+            const factionPilots = database.pilots.filter(p => p.faction === factionId);
+            const factionName = FACTION_NAMES[factionId] || factionId;
+
+            let factionHtml = `<h2 class="faction-header">${factionName}</h2><div class="row">`;
+            factionPilots.sort((a, b) => b.initiative - a.initiative);
+
             factionPilots.forEach(pilot => {
                 const index = database.pilots.indexOf(pilot);
                 factionHtml += `
                     <div class="col-sm-6 col-lg-4">
                         <div class="card-custom shadow-sm">
                             <div class="d-flex justify-content-between align-items-start">
-                                <h6 class="mb-1 text-white fw-bold">${pilot.name}</h6>
+                                <h6 class="mb-1 text-white fw-bold">(${pilot.initiative}) ${pilot.name}</h6>
                                 <span class="badge badge-points">${pilot.points} pt</span>
                             </div>
                             <p class="pilot-ship-name mb-2">${pilot.ship}</p>
@@ -191,10 +168,8 @@
         const pilot = database.pilots[index];
         const squadItem = {
             ...pilot,
-            uniqueId: Date.now() + Math.random(),
-            selectedUpgrades: {}
+            uniqueId: Date.now() + Math.random()
         };
-        pilot.slots.forEach(slot => { squadItem.selectedUpgrades[slot] = 0; });
         currentSquad.push(squadItem);
         updateSquadUI();
     };
@@ -202,14 +177,6 @@
     window.removePilot = function(uniqueId) {
         currentSquad = currentSquad.filter(p => p.uniqueId !== uniqueId);
         updateSquadUI();
-    };
-
-    window.changeUpgrade = function(pilotUniqueId, slot, upgradeIndex) {
-        const pObj = currentSquad.find(p => p.uniqueId === pilotUniqueId);
-        if (pObj) {
-            pObj.selectedUpgrades[slot] = upgradeIndex;
-            updateSquadUI();
-        }
     };
 
     function updateSquadUI() {
@@ -226,53 +193,20 @@
         let html = "";
 
         currentSquad.forEach(pilot => {
-            let pilotCost = pilot.points;
-            let upgradeHtml = "";
-
-            pilot.slots.forEach(slot => {
-                const available = database.upgrades[slot] || [];
-                const selectedIdx = pilot.selectedUpgrades[slot];
-                
-                if (selectedIdx && available[selectedIdx - 1]) {
-                    pilotCost += available[selectedIdx - 1].points;
-                }
-
-                upgradeHtml += `
-                    <div class="d-flex align-items-center justify-content-between mt-1">
-                        <small class="text-muted" style="font-size:0.75rem;">${slot}:</small>
-                        <select class="upgrade-select" onchange="changeUpgrade(${pilot.uniqueId}, '${slot}', this.value)">
-                            <option value="0">Nessuno</option>
-                            ${available.map((up, i) => `
-                                <option value="${i+1}" ${selectedIdx == (i+1) ? 'selected' : ''}>${up.name} (+${up.points}pt)</option>
-                            `).join('')}
-                        </select>
-                    </div>
-                `;
-            });
-
-            totalPoints += pilotCost;
-
+            totalPoints += pilot.points;
             html += `
                 <div class="p-2 mb-2 rounded" style="background-color: #252525; border: 1px solid #444;">
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-white fw-bold" style="font-size:0.9rem;">${pilot.name}</span>
                         <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:0.7rem;" onclick="removePilot(${pilot.uniqueId})">X</button>
                     </div>
-                    <small class="text-warning" style="font-size:0.75rem;">${pilotCost} pt</small>
-                    <div class="mt-1" style="border-top: 1px dashed #444; padding-top:4px;">
-                        ${upgradeHtml}
-                    </div>
+                    <small class="text-warning" style="font-size:0.75rem;">${pilot.points} pt</small>
                 </div>
             `;
         });
 
         content.innerHTML = html;
         totalPointsSpan.innerText = `${totalPoints} / 200`;
-        if (totalPoints > 200) {
-            totalPointsSpan.className = "badge bg-danger fs-5";
-        } else {
-            totalPointsSpan.className = "badge badge-points fs-5";
-        }
     }
 
     window.onload = loadDatabase;
