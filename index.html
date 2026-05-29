@@ -15,8 +15,8 @@
         .squad-list { background-color: #1a1a1a; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; position: sticky; top: 20px; }
         .loading-status { color: #ffc107; font-style: italic; margin-bottom: 15px; font-size: 1.2rem; }
         .pilot-ship-name { color: #aaa; font-size: 0.85rem; font-style: italic; }
-        .filter-btn { margin-right: 5px; margin-bottom: 5px; font-size: 0.85rem; fw-bold; }
-        .ship-filter-container { background-color: #1c1c1c; padding: 10px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #2a2a2a; }
+        .filter-btn { margin-right: 5px; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; }
+        .ship-filter-container { background-color: #1c1c1c; padding: 15px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #ffc107; }
     </style>
 </head>
 <body>
@@ -26,15 +26,15 @@
         <div class="col-12 text-center mb-4">
             <h1 class="display-5 text-warning fw-bold">X-Wing Squad Builder</h1>
             <p class="lead text-muted">Database Totale di Darker333 + Bilanciamento di Pandorum</p>
-            <div id="loading-msg" class="loading-status">Inizializzazione flotta galattica (Caricamento di circa 100 file)...</div>
+            <div id="loading-msg" class="loading-status">Inizializzazione flotta galattica...</div>
             
             <!-- Menu Principale: FAZIONI -->
             <div class="mt-3" id="faction-filters"></div>
         </div>
     </div>
 
-    <!-- Sottomenu: TIPI DI NAVE (Compare dinamicamente) -->
-    <div class="row d-none" id="ship-filters-row">
+    <!-- Sottomenu: TIPI DI NAVE -->
+    <div class="row" id="ship-filters-row" style="display: none !important;">
         <div class="col-12">
             <div class="ship-filter-container">
                 <span class="text-warning small d-block mb-2 fw-bold text-uppercase">Filtra per Tipo di Nave:</span>
@@ -67,9 +67,6 @@
 </div>
 
 <script>
-    // ==========================================
-    // ✍️ SEZIONE PERSONALIZZAZIONE PUNTI DI PANDORUM
-    // ==========================================
     const I_MIEI_PUNTI = {
         "lukeskywalker": 53,
         "wedgeantilles": 54,
@@ -112,8 +109,8 @@
         "scum": "Feccia e Malavita (Scum)",
         "firstorder": "Primo Ordine (First Order)",
         "resistance": "Resistenza (Resistance)",
-        "galacticrepublic": "Repubblica Galattica (Republic)",
-        "separatistalliance": "Alleanza Separatista (Separatists)"
+        "galacticrepublic": "Repubblica Galattica",
+        "separatistalliance": "Alleanza Separatista"
     };
 
     function getCustomCost(pilot) {
@@ -148,17 +145,17 @@
         await Promise.all(fetchPromises);
 
         if (database.pilots.length > 0) {
-            document.getElementById('loading-msg').innerHTML = `✅ Flotta caricata con successo! Inseriti ${database.pilots.length} piloti da Darker333.`;
+            document.getElementById('loading-msg').innerHTML = `✅ Flotta caricata: ${database.pilots.length} piloti disponibili.`;
             generateFactionFilters();
             renderFactions();
         } else {
-            document.getElementById('loading-msg').innerHTML = "⚠️ Errore critico nel caricamento.";
+            document.getElementById('loading-msg').innerHTML = "⚠️ Errore nel caricamento dei dati.";
         }
     }
 
     function generateFactionFilters() {
         const filtersDiv = document.getElementById('faction-filters');
-        filtersDiv.innerHTML = '<button class="btn btn-warning btn-sm filter-btn fw-bold" id="btn-f-all" onclick="filterFaction(\'all\')">MOSTRA TUTTE</button>';
+        filtersDiv.innerHTML = '<button class="btn btn-warning btn-sm filter-btn" id="btn-f-all" onclick="filterFaction(\'all\')">MOSTRA TUTTE</button>';
         
         const activeFactions = [...new Set(database.pilots.map(p => p.faction))];
         activeFactions.forEach(fId => {
@@ -169,12 +166,17 @@
 
     window.filterFaction = function(factionId) {
         currentFactionFilter = factionId;
-        currentShipFilter = "all"; // Resetta il filtro nave quando cambi fazione
+        currentShipFilter = "all"; 
         
-        // Aggiorna lo stile dei pulsanti fazione
-        document.querySelectorAll('#faction-filters .btn').forEach(btn => btn.classList.replace('btn-warning', 'btn-outline-secondary'));
-        document.getElementById(`btn-f-${factionId}`).classList.remove('btn-outline-secondary');
-        document.getElementById(`btn-f-${factionId}`).classList.add('btn-warning');
+        document.querySelectorAll('#faction-filters .btn').forEach(btn => {
+            btn.classList.remove('btn-warning');
+            btn.classList.add('btn-outline-secondary', 'text-white');
+        });
+        const activeBtn = document.getElementById(`btn-f-${factionId}`);
+        if(activeBtn) {
+            activeBtn.classList.remove('btn-outline-secondary', 'text-white');
+            activeBtn.classList.add('btn-warning');
+        }
 
         generateShipFilters(factionId);
         renderFactions();
@@ -185,19 +187,18 @@
         const container = document.getElementById('ship-filters');
         
         if (factionId === 'all') {
-            row.classList.add('d-none');
+            row.setAttribute('style', 'display: none !important;');
             return;
         }
         
-        row.classList.remove('d-none');
-        container.innerHTML = '<button class="btn btn-warning btn-sm filter-btn fw-bold" id="btn-s-all" onclick="filterShip(\'all\')">TUTTE LE NAVI</button>';
+        row.setAttribute('style', 'display: block !important;');
+        container.innerHTML = '<button class="btn btn-warning btn-sm filter-btn" id="btn-s-all" onclick="filterShip(\'all\')">TUTTE LE NAVI</button>';
         
-        // Prende solo le navi effettivamente presenti in questa fazione
         const factionPilots = database.pilots.filter(p => p.faction === factionId);
         const ships = [...new Set(factionPilots.map(p => p.ship))].sort();
         
         ships.forEach(shipName => {
-            const cleanId = shipName.replace(/[^a-zA-Z0-9]/g, "");
+            const cleanId = btoa(encodeURIComponent(shipName)).replace(/=/g, ""); // ID univoco sicuro per i pulsanti
             container.innerHTML += `<button class="btn btn-outline-light btn-sm filter-btn" id="btn-s-${cleanId}" onclick="filterShip('${shipName}')">${shipName}</button>`;
         });
     }
@@ -205,11 +206,17 @@
     window.filterShip = function(shipName) {
         currentShipFilter = shipName;
 
-        // Aggiorna grafica pulsanti nave
-        document.querySelectorAll('#ship-filters .btn').forEach(btn => btn.classList.replace('btn-warning', 'btn-outline-light'));
-        const cleanId = shipName === 'all' ? 'all' : shipName.replace(/[^a-zA-Z0-9]/g, "");
-        document.getElementById(`btn-s-${cleanId}`).classList.remove('btn-outline-light');
-        document.getElementById(`btn-s-${cleanId}`).classList.add('btn-warning');
+        document.querySelectorAll('#ship-filters .btn').forEach(btn => {
+            btn.classList.remove('btn-warning');
+            btn.classList.add('btn-outline-light');
+        });
+        
+        const cleanId = shipName === 'all' ? 'all' : btoa(encodeURIComponent(shipName)).replace(/=/g, "");
+        const activeBtn = document.getElementById(`btn-s-${cleanId}`);
+        if(activeBtn) {
+            activeBtn.classList.remove('btn-outline-light');
+            activeBtn.classList.add('btn-warning');
+        }
 
         renderFactions();
     };
@@ -218,7 +225,6 @@
         const container = document.getElementById('factions-container');
         container.innerHTML = "";
 
-        // Applica i filtri combinati
         let filteredPilots = database.pilots;
         if (currentFactionFilter !== 'all') {
             filteredPilots = filteredPilots.filter(p => p.faction === currentFactionFilter);
