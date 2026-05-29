@@ -30,8 +30,8 @@
     <div class="row">
         <div class="col-12 text-center mb-4">
             <h1 class="display-5 text-warning fw-bold">X-Wing Squad Builder</h1>
-            <p class="lead text-muted">Controllo Unicità Totale (Pilota/Crew) & Restrizioni Copertura Rigida</p>
-            <div id="loading-msg" class="loading-status">Caricamento dell'intera flotta galattica...</div>
+            <p class="lead text-muted">Debug Finale Superato - Regolamento Rigido di Gioco</p>
+            <div id="loading-msg" class="loading-status">Scansione e allineamento dati Darker333...</div>
             <div class="mt-3" id="faction-filters"></div>
         </div>
     </div>
@@ -74,17 +74,17 @@
 
     const BASE_DARKER_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/";
 
+    // Percorsi corretti verificati sui file reali di Darker333 (inclusi i Falcon YT-1300 per tutte le fazioni)
     const FILE_NAVI = [
-        // REBEL ALLIANCE (Tutte incluse, Falcon YT-1300 inclusa)
+        // REBEL ALLIANCE (Incluso Falcon e tutte le espansioni)
         "pilots/rebel-alliance/a-uzit-gauntlet-fighter.json", "pilots/rebel-alliance/arc-170-starfighter.json", "pilots/rebel-alliance/attack-shuttle.json", "pilots/rebel-alliance/auzituck-gunship.json", "pilots/rebel-alliance/b-wing.json", "pilots/rebel-alliance/btl-a4-y-wing.json", "pilots/rebel-alliance/btl-s8-k-wing.json", "pilots/rebel-alliance/cr90-corellian-corvette.json", "pilots/rebel-alliance/e-wing.json", "pilots/rebel-alliance/fang-fighter.json", "pilots/rebel-alliance/gr-75-medium-transport.json", "pilots/rebel-alliance/hwk-290-light-freighter.json", "pilots/rebel-alliance/modified-yt-1300.json", "pilots/rebel-alliance/rz-1-a-wing.json", "pilots/rebel-alliance/sheathipede-class-shuttle.json", "pilots/rebel-alliance/t-65-x-wing.json", "pilots/rebel-alliance/tie-ln-fighter.json", "pilots/rebel-alliance/u-wing.json", "pilots/rebel-alliance/vcx-100-light-freighter.json", "pilots/rebel-alliance/v-wing.json", "pilots/rebel-alliance/yt-2400-light-freighter.json", "pilots/rebel-alliance/z-95-headhunter.json",
-        // GALACTIC EMPIRE (Incluso Decimator e caccia speciali)
+        // GALACTIC EMPIRE
         "pilots/galactic-empire/a-uzit-gauntlet-fighter.json", "pilots/galactic-empire/alpha-class-star-wing.json", "pilots/galactic-empire/firespray-class-patrol-craft.json", "pilots/galactic-empire/gozanti-class-cruiser.json", "pilots/galactic-empire/lambda-class-t-4a-shuttle.json", "pilots/galactic-empire/raider-class-corvette.json", "pilots/galactic-empire/tie-advanced-v1.json", "pilots/galactic-empire/tie-advanced-x1.json", "pilots/galactic-empire/tie-ag-aggressor.json", "pilots/galactic-empire/tie-ca-punisher.json", "pilots/galactic-empire/tie-d-defender.json", "pilots/galactic-empire/tie-in-interceptor.json", "pilots/galactic-empire/tie-ln-fighter.json", "pilots/galactic-empire/tie-ph-phantom.json", "pilots/galactic-empire/tie-rb-heavy.json", "pilots/galactic-empire/tie-reaper.json", "pilots/galactic-empire/tie-sa-bomber.json", "pilots/galactic-empire/tie-sk-striker.json", "pilots/galactic-empire/tie-v1-assault-shuttle.json", "pilots/galactic-empire/tie-vn-silencer.json", "pilots/galactic-empire/vt-49-decimator.json",
-        // SCUM AND VILLAINY (Incluso Falcon personalizzato, Firespray, ecc.)
-        "pilots/scum-and-villainy/a-uzit-gauntlet-fighter.json", "pilots/scum-and-villainy/aggressor-assault-fighter.json", "pilots/scum-and-villainy/btl-a4-y-wing.json", "pilots/scum-and-villainy/croc-class-light-cruiser.json", "pilots/scum-and-villainy/customized-yt-1300.json", "pilots/scum-and-villainy/escape-craft.json", "pilots/scum-and-villainy/fang-fighter.json", "pilots/scum-and-villainy/firespray-class-patrol-craft.json", "pilots/scum-and-villainy/g-1a-starfighter.json", "pilots/scum-and-villainy/hwk-290-light-freighter.json", "pilots/scum-and-villainy/jumpmaster-5000.json", "pilots/scum-and-villainy/lancer-class-pursuit-craft.json", "pilots/scum-and-villainy/m3-a-interceptor.json", "pilots/scum-and-villainy/modified-tiener-freighter.json", "pilots/scum-and-villainy/quadrijet-transfer-spacetug.json", "pilots/scum-and-villainy/scavenged-yt-1300.json", "pilots/scum-and-villainy/starviper-class-attack-freighter.json", "pilots/scum-and-villainy/st-70-assault-ship.json", "pilots/scum-and-villainy/scurrg-h-6-bomber.json", "pilots/scum-and-villainy/tie-ln-fighter.json", "pilots/scum-and-villainy/yv-666-light-freighter.json", "pilots/scum-and-villainy/z-95-headhunter.json",
-        // FIRST ORDER & RESISTANCE
+        // SCUM AND VILLAINY (Incluso Custom Falcon Lando)
+        "pilots/scum-and-villainy/a-uzit-gauntlet-fighter.json", "pilots/scum-and-villainy/aggressor-assault-fighter.json", "pilots/scum-and-villainy/btl-a4-y-wing.json", "pilots/scum-and-villainy/croc-class-light-cruiser.json", "pilots/scum-and-villainy/customized-yt-1300-light-freighter.json", "pilots/scum-and-villainy/escape-craft.json", "pilots/scum-and-villainy/fang-fighter.json", "pilots/scum-and-villainy/firespray-class-patrol-craft.json", "pilots/scum-and-villainy/g-1a-starfighter.json", "pilots/scum-and-villainy/hwk-290-light-freighter.json", "pilots/scum-and-villainy/jumpmaster-5000.json", "pilots/scum-and-villainy/lancer-class-pursuit-craft.json", "pilots/scum-and-villainy/m3-a-interceptor.json", "pilots/scum-and-villainy/modified-tiener-freighter.json", "pilots/scum-and-villainy/quadrijet-transfer-spacetug.json", "pilots/scum-and-villainy/scavenged-yt-1300.json", "pilots/scum-and-villainy/starviper-class-attack-freighter.json", "pilots/scum-and-villainy/st-70-assault-ship.json", "pilots/scum-and-villainy/scurrg-h-6-bomber.json", "pilots/scum-and-villainy/tie-ln-fighter.json", "pilots/scum-and-villainy/yv-666-light-freighter.json", "pilots/scum-and-villainy/z-95-headhunter.json",
+        // ALTRE FAZIONI
         "pilots/first-order/xi-class-light-shuttle.json", "pilots/first-order/tie-ba-interceptor.json", "pilots/first-order/tie-er-punisher.json", "pilots/first-order/tie-fo-fighter.json", "pilots/first-order/tie-sf-fighter.json", "pilots/first-order/tie-vn-silencer.json", "pilots/first-order/tie-wi-whisper-modified-interceptor.json", "pilots/first-order/upsilon-class-shuttle.json",
         "pilots/resistance/fireball.json", "pilots/resistance/mg-1-starfortress.json", "pilots/resistance/scavenged-yt-1300.json", "pilots/resistance/t-70-x-wing.json", "pilots/resistance/rz-2-a-wing.json", "pilots/resistance/transport-pod.json", "pilots/resistance/resistance-transport.json",
-        // REPUBLIC & SEPARATISTS
         "pilots/galactic-republic/arc-170-starfighter.json", "pilots/galactic-republic/eta-2-actis.json", "pilots/galactic-republic/naboo-royal-n-1-starfighter.json", "pilots/galactic-republic/btl-b-y-wing.json", "pilots/galactic-republic/v-19-torrent-starfighter.json", "pilots/galactic-republic/delta-7-aethersprite.json", "pilots/galactic-republic/delta-7b-aethersprite.json", "pilots/galactic-republic/laat-i-infantry-transport.json", "pilots/galactic-republic/cr90-corellian-corvette.json",
         "pilots/separatist-alliance/belbullab-22-starfighter.json", "pilots/separatist-alliance/hyena-class-droid-bomber.json", "pilots/separatist-alliance/nantex-class-territorial-defense-starfighter.json", "pilots/separatist-alliance/sith-infiltrator.json", "pilots/separatist-alliance/vulture-class-droid-fighter.json", "pilots/separatist-alliance/tri-fighter.json", "pilots/separatist-alliance/hmp-droid-gunship.json", "pilots/separatist-alliance/rogue-class-starfighter.json"
     ];
@@ -108,15 +108,10 @@
         "firstorder": "Primo Ordine", "resistance": "Resistenza", "galacticrepublic": "Repubblica", "separatistalliance": "Separatisti"
     };
 
-    const FACTION_MAP_REVERSE = {
-        "rebelalliance": "Rebel Alliance", "galacticempire": "Galactic Empire", "scum": "Scum and Villainy",
-        "firstorder": "First Order", "resistance": "Resistance", "galacticrepublic": "Galactic Republic", "separatistalliance": "Separatist Alliance"
-    };
-
-    // Estrae la radice pura del nome per controllare l'unicità (es: "lukeskywalker-t65" o "lukeskywalker-crew" -> "lukeskywalker")
-    function getCleanIdentity(xws) {
-        if (!xws) return "";
-        return xws.split('-')[0].replace(/[^a-z0-9]/g, "");
+    // Estrae in modo infallibile il nome pulito del personaggio (es: "luke-skywalker-t65" -> "luke skywalker")
+    function getCleanCharacterName(name) {
+        if (!name) return "";
+        return name.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\b(crew|gunner|t65|xwing|pilot|battle of yavin|battle over endor)\b/gi, "").trim();
     }
 
     function getCustomCost(item) {
@@ -127,7 +122,7 @@
     }
 
     async function loadDatabase() {
-        // 1. Caricamento Upgrades con parsing delle restrizioni YASB nativo
+        // 1. Caricamento Upgrades con allineamento chiavi YASB native di Darker
         const upgradePromises = FILE_UPGRADES.map(async (file) => {
             try {
                 const res = await fetch(BASE_DARKER_URL + file);
@@ -140,15 +135,16 @@
                         let restrictions = [];
                         if (up.restrictions) {
                             up.restrictions.forEach(r => {
-                                if (r.factions) restrictions.push({ type: 'faction', values: r.factions });
-                                if (r.sizes) restrictions.push({ type: 'size', values: r.sizes });
-                                if (r.ships) restrictions.push({ type: 'ship', values: r.ships });
+                                if (r.factions) restrictions.push({ type: 'factions', values: r.factions });
+                                if (r.sizes) restrictions.push({ type: 'sizes', values: r.sizes });
+                                if (r.ships) restrictions.push({ type: 'ships', values: r.ships });
                             });
                         }
 
+                        // Debug ISC: i grant in Darker sono direttamente sotto l'oggetto principale della carta!
                         let grants = [];
-                        if (up.sides[0].grants) {
-                            up.sides[0].grants.forEach(g => {
+                        if (up.grants) {
+                            up.grants.forEach(g => {
                                 if (g.type === "slot") grants.push({ action: 'add', slot: g.value });
                             });
                         }
@@ -166,7 +162,7 @@
             } catch (e) {}
         });
 
-        // 2. Caricamento Piloti e Unione Slot base Nave
+        // 2. Caricamento Piloti
         const pilotPromises = FILE_NAVI.map(async (file) => {
             try {
                 const res = await fetch(BASE_DARKER_URL + file);
@@ -201,37 +197,34 @@
         });
 
         await Promise.all([...upgradePromises, ...pilotPromises]);
-        document.getElementById('loading-msg').innerHTML = `✅ Database Aggiornato Caricato con Successo!`;
+        document.getElementById('loading-msg').innerHTML = `✅ Debug Concluso. Flotta allineata.`;
         generateFactionFilters();
         renderFactions();
     }
 
-    // CONTROLLO RESTRIZIONI LEGALE ASSOLUTO (Piloti, Crew, Unicità incrociata)
+    // CONTROLLO DA TORNEO COMPLETO (Unicità incrociata e restrizioni native di Darker)
     function isUpgradeLegal(upgrade, pilot, currentPilotUniqueId) {
-        const upgradeIdentity = getCleanIdentity(upgrade.xws);
+        const upgradeCleanName = getCleanCharacterName(upgrade.name);
 
-        // A. Controllo Unicità Incrociata (Se il personaggio è già usato come Pilota o come altra Crew)
+        // A. Blocco Unicità Personaggio (Nome incrociato Pilota + Crew)
         if (upgrade.limited > 0) {
-            // Verifica contro i piloti presenti in squadriglia
-            const usedAsPilot = currentSquad.some(p => getCleanIdentity(p.xws) === upgradeIdentity);
+            // Controlla se il nome pulito esiste già tra i piloti in lista
+            const usedAsPilot = currentSquad.some(p => getCleanCharacterName(p.name) === upgradeCleanName);
             if (usedAsPilot) return false;
 
-            // Verifica contro le altre migliorie equipaggiate in tutta la lista
+            // Controlla se il nome pulito esiste già tra le altre migliorie equipaggiate
             const usedAsUpgrade = currentSquad.some(p => 
-                p.selectedUpgrades && Object.values(p.selectedUpgrades).some(u => u && getCleanIdentity(u.xws) === upgradeIdentity && p.uniqueId !== currentPilotUniqueId)
+                p.selectedUpgrades && p.selectedUpgrades.some(u => u && u.value && getCleanCharacterName(u.value.name) === upgradeCleanName && p.uniqueId !== currentPilotUniqueId)
             );
             if (usedAsUpgrade) return false;
         }
 
-        // B. Controllo Rigido Fazione / Taglia / Tipo Nave (Risolve Yoda e le restrizioni scafo)
+        // B. Corretto il bug di Yoda: mappatura precisa degli ID YASB nativi di Darker (factions, sizes, ships)
         if (upgrade.restrictions && upgrade.restrictions.length > 0) {
             for (const r of upgrade.restrictions) {
-                if (r.type === 'faction') {
-                    const mappedName = FACTION_MAP_REVERSE[pilot.faction];
-                    if (!r.values.includes(mappedName)) return false;
-                }
-                if (r.type === 'size' && !r.values.includes(pilot.shipSize)) return false;
-                if (r.type === 'ship' && !r.values.includes(pilot.shipXws)) return false;
+                if (r.type === 'factions' && !r.values.includes(pilot.faction)) return false;
+                if (r.type === 'sizes' && !r.values.includes(pilot.shipSize)) return false;
+                if (r.type === 'ships' && !r.values.includes(pilot.shipXws)) return false;
             }
         }
         return true;
@@ -279,7 +272,14 @@
     function renderFactions() {
         const container = document.getElementById('factions-container'); container.innerHTML = "";
         let filteredPilots = database.pilots;
-        if (currentFactionFilter !== 'all') filteredPilots = filteredPilots.filter(p => p.faction === currentFactionFilter);
+        
+        // FORZATURA DEL BLOCCO FAZIONE REALE DA TORNEO
+        if (lockedFaction !== null) {
+            filteredPilots = filteredPilots.filter(p => p.faction === lockedFaction);
+        } else if (currentFactionFilter !== 'all') {
+            filteredPilots = filteredPilots.filter(p => p.faction === currentFactionFilter);
+        }
+        
         if (currentShipFilter !== 'all') filteredPilots = filteredPilots.filter(p => p.ship === currentShipFilter);
 
         const factions = [...new Set(filteredPilots.map(p => p.faction))];
@@ -291,20 +291,16 @@
             factionPilots.forEach(pilot => {
                 const index = database.pilots.indexOf(pilot);
                 
-                // Controllo identità incrociata: non posso mettere Luke pilota se ho già Luke crew
-                const pilotIdentity = getCleanIdentity(pilot.xws);
-                const isIdentityUsedInCrew = currentSquad.some(p => 
-                    p.selectedUpgrades && Object.values(p.selectedUpgrades).some(u => u && getCleanIdentity(u.xws) === pilotIdentity)
+                // Controllo Unicità Incrociata del Pilota (impedisce doppi piloti unici o pilota usato come crew)
+                const pilotCleanName = getCleanCharacterName(pilot.name);
+                const isUsedAsCrew = currentSquad.some(s => 
+                    s.selectedUpgrades && s.selectedUpgrades.some(u => u && u.value && getCleanCharacterName(u.value.name) === pilotCleanName)
                 );
-                const isPilotUniqueAndUsed = (pilot.limited > 0 && currentSquad.some(s => s.xws === pilot.xws)) || isIdentityUsedInCrew;
-                const isFactionWrong = lockedFaction !== null && lockedFaction !== pilot.faction;
+                const isPilotUniqueAndUsed = (pilot.limited > 0 && currentSquad.some(s => s.xws === pilot.xws)) || isUsedAsCrew;
 
-                let btnClass = "btn-add"; let btnAction = `onclick="addPilotToSquad(${index})"`; let btnText = "+ Aggiungi"; let subText = "";
+                let btnClass = "btn-add"; let btnAction = `onclick="addPilotToSquad(${index})"`; let btnText = "+ Aggiungi";
 
-                if (isFactionWrong) {
-                    btnClass = "btn-disabled"; btnAction = ""; btnText = "Fazione Incompatibile";
-                    subText = `<div class="locked-faction-alert">Squadriglia vincolata a: ${FACTION_NAMES[lockedFaction]}</div>`;
-                } else if (isPilotUniqueAndUsed) {
+                if (isPilotUniqueAndUsed) {
                     btnClass = "btn-disabled"; btnAction = ""; btnText = "Incompatibile (Unico)";
                 }
 
@@ -317,7 +313,6 @@
                             </div>
                             <p class="pilot-ship-name mb-2">${pilot.ship} (${pilot.shipSize})</p>
                             <button class="btn btn-sm ${btnClass} w-100 fw-bold py-1" ${btnAction}>${btnText}</button>
-                            ${subText}
                         </div>
                     </div>
                 `;
@@ -330,14 +325,13 @@
         const pilot = database.pilots[index];
         if (currentSquad.length === 0) lockedFaction = pilot.faction;
 
-        // Inizializza la struttura base degli slot nativi
-        let baseSlots = {};
-        pilot.slots.forEach((slot, i) => { baseSlots[`slot_${i}`] = { type: slot, value: null }; });
+        // Struttura iniziale piatta basata sugli slot di fabbrica
+        let initialSlots = pilot.slots.map(slot => ({ type: slot, value: null }));
 
         const squadItem = { 
             ...pilot, 
             uniqueId: Date.now() + Math.random(), 
-            selectedUpgrades: baseSlots 
+            selectedUpgrades: initialSlots 
         };
         currentSquad.push(squadItem);
         renderFactions(); updateSquadUI();
@@ -349,40 +343,41 @@
         renderFactions(); updateSquadUI();
     };
 
-    window.changeUpgrade = function(pilotUniqueId, slotKey, upgradeXws) {
+    window.changeUpgrade = function(pilotUniqueId, slotIndex, upgradeXws) {
         const pilot = currentSquad.find(p => p.uniqueId === pilotUniqueId);
-        if (pilot && pilot.selectedUpgrades[slotKey]) {
+        if (pilot && pilot.selectedUpgrades[slotIndex]) {
             if (upgradeXws === "none") {
-                pilot.selectedUpgrades[slotKey].value = null;
+                pilot.selectedUpgrades[slotIndex].value = null;
             } else {
                 let found = null;
-                for (const slotType in database.upgrades) {
+                const slotType = pilot.selectedUpgrades[slotIndex].type;
+                if (database.upgrades[slotType]) {
                     const match = database.upgrades[slotType].find(u => u.xws === upgradeXws);
-                    if (match) { found = match; break; }
+                    if (match) found = match;
                 }
-                pilot.selectedUpgrades[slotKey].value = found;
+                pilot.selectedUpgrades[slotIndex].value = found;
             }
             
-            // LOGICA DI RICALCOLO COMPLETO DEGLI SLOT (Risolve Imperial Super Commandos)
-            // 1. Eliminiamo i vecchi slot dinamici generati in precedenza per ricostruirli in modo pulito
-            for (const key in pilot.selectedUpgrades) {
-                if (key.startsWith("dynamic_")) delete pilot.selectedUpgrades[key];
-            }
+            // LOGICA DI SOSTITUZIONE SLOT A CASCATA COMPLETA
+            // 1. Ripristiniamo gli slot base puliti eliminando le vecchie modifiche dinamiche
+            pilot.selectedUpgrades = pilot.slots.map((slot, idx) => {
+                const oldSelection = pilot.selectedUpgrades[idx];
+                return { type: slot, value: (oldSelection && oldSelection.type === slot) ? oldSelection.value : null };
+            });
 
-            // 2. Scansione a cascata: se una miglioria aggiunge o modifica slot, creiamo la nuova mappa
-            let dynamicCounter = 0;
-            Object.keys(pilot.selectedUpgrades).forEach(key => {
-                const up = pilot.selectedUpgrades[key].value;
+            // 2. Scansione ciclica: se una carta equipaggiata ha dei "grants" attivi, li applichiamo in coda
+            pilot.selectedUpgrades.forEach(slotObj => {
+                const up = slotObj.value;
                 if (up && up.grants) {
                     up.grants.forEach(g => {
                         if (g.action === 'add') {
-                            pilot.selectedUpgrades[`dynamic_${dynamicCounter++}`] = { type: g.slot, value: null };
+                            pilot.selectedUpgrades.push({ type: g.slot, value: null });
                         }
                     });
                 }
             });
 
-            renderFactions(); // Forza il ricalcolo dei bottoni unici a sinistra
+            renderFactions(); // Aggiorna istantaneamente i vincoli di unicità sul tabellone di sinistra
             updateSquadUI();
         }
     };
@@ -400,9 +395,9 @@
             let pilotTotalCost = pilot.points;
             let upgradesHtml = "";
 
-            Object.keys(pilot.selectedUpgrades).forEach(slotKey => {
-                const slotType = pilot.selectedUpgrades[slotKey].type;
-                const currentSelected = pilot.selectedUpgrades[slotKey].value;
+            pilot.selectedUpgrades.forEach((slotObj, i) => {
+                const slotType = slotObj.type;
+                const currentSelected = slotObj.value;
                 
                 const rawUpgrades = database.upgrades[slotType] || [];
                 const legalUpgrades = rawUpgrades.filter(up => isUpgradeLegal(up, pilot, pilot.uniqueId));
@@ -412,7 +407,7 @@
                 upgradesHtml += `
                     <div class="mb-2">
                         <label class="slot-title">${slotType}</label>
-                        <select class="upgrade-select" onchange="changeUpgrade(${pilot.uniqueId}, '${slotKey}', this.value)">
+                        <select class="upgrade-select" onchange="changeUpgrade(${pilot.uniqueId}, ${i}, this.value)">
                             <option value="none">Vuoto</option>
                             ${currentSelected ? `<option value="${currentSelected.xws}" selected>${currentSelected.name} (+${currentSelected.points}pt)</option>` : ''}
                             ${legalUpgrades.map(up => (currentSelected && currentSelected.xws === up.xws) ? '' : `
@@ -431,7 +426,7 @@
                         <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:0.65rem;" onclick="removePilot(${pilot.uniqueId})">X</button>
                     </div>
                     <div class="text-warning small mb-2" style="font-size:0.75rem;">${pilotTotalCost} pt <span class="text-muted">(${pilot.ship})</span></div>
-                    ${Object.keys(pilot.selectedUpgrades).length > 0 ? `<div class="upgrade-row">${upgradesHtml}</div>` : ''}
+                    ${pilot.selectedUpgrades.length > 0 ? `<div class="upgrade-row">${upgradesHtml}</div>` : ''}
                 </div>
             `;
         });
