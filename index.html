@@ -3,441 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Wing Squad Builder - Pandorum Tournament Core</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <title>X-Wing Squad Builder - Pandorum Engine</title>
     <style>
-        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card-custom { background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; margin-bottom: 15px; padding: 15px; }
-        .badge-points { background-color: #ffc107; color: #000; font-weight: bold; font-size: 0.9rem; }
-        .faction-header { border-bottom: 2px solid #ffc107; padding-bottom: 10px; margin-top: 25px; margin-bottom: 20px; color: #ffc107; text-transform: uppercase; font-size: 1.5rem; font-weight: bold; }
-        .btn-add { background-color: #198754; color: white; border: none; }
-        .btn-add:hover { background-color: #157347; color: white; }
-        .btn-disabled { background-color: #444 !important; color: #888 !important; border: none; cursor: not-allowed; }
-        .squad-list { background-color: #1a1a1a; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; position: sticky; top: 20px; }
-        .loading-status { color: #ffc107; font-style: italic; margin-bottom: 15px; font-size: 1.2rem; }
-        .pilot-ship-name { color: #aaa; font-size: 0.85rem; font-style: italic; }
-        .filter-btn { margin-right: 5px; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; }
-        .ship-filter-container { background-color: #1c1c1c; padding: 15px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #ffc107; }
-        .upgrade-select { background-color: #2b2b2b; color: #fff; border: 1px solid #444; font-size: 0.8rem; padding: 4px 6px; border-radius: 4px; width: 100%; }
-        .upgrade-row { border-top: 1px dashed #444; margin-top: 8px; padding-top: 6px; }
-        .slot-title { color: #ffc107; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; margin-top: 8px; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #yasb-container {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: #ffc107;
+            transition: opacity 0.5s ease;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 193, 7, 0.1);
+            width: 50px;
+            height: 50px;
+            border-left-color: #ffc107;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @animation spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 
-<div class="container py-4">
-    <div class="row">
-        <div class="col-12 text-center mb-4">
-            <h1 class="display-5 text-warning fw-bold">X-Wing Squad Builder</h1>
-            <p class="lead text-muted">Architettura di Controllo Rigida & Database Integrale</p>
-            <div id="loading-msg" class="loading-status">Caricamento e isolamento dei flussi dati in corso...</div>
-            <div class="mt-3" id="faction-filters"></div>
-        </div>
-    </div>
-
-    <div class="row" id="ship-filters-row" style="display: none !important;">
-        <div class="col-12">
-            <div class="ship-filter-container">
-                <span class="text-warning small d-block mb-2 fw-bold text-uppercase">Filtra per Tipo di Nave:</span>
-                <div id="ship-filters"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-8">
-            <div id="factions-container"></div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="squad-list shadow">
-                <h3 class="h4 text-warning mb-3">La tua Squadriglia</h3>
-                <div id="squad-content">
-                    <p class="text-muted italic">Nessun pilota selezionato.</p>
-                </div>
-                <hr style="border-color: #444;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">Totale Punti:</span>
-                    <span id="total-points" class="badge badge-points fs-5">0 / 200</span>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="loading-overlay">
+    <div class="spinner"></div>
+    <h2>Iniezione Motore YASB & Punti Darker333...</h2>
+    <p style="color: #aaa; font-style: italic;">Sincronizzazione regole da torneo e restrizioni avanzate</p>
 </div>
 
+<!-- L'applicazione viene caricata dentro un contesto isolato ma controllato -->
+<iframe id="yasb-container" src="https://yasb.app/?f=Rebel%20Alliance&p=20&a=0" title="X-Wing Squad Builder"></iframe>
+
 <script>
-    // Tabella modifiche Pandorum
-    const I_MIEI_PUNTI = {
+    // ==========================================
+    // ✍️ SEZIONE PERSONALIZZAZIONE PUNTI DI PANDORUM
+    // ==========================================
+    // Se vuoi ritoccare ulteriormente i punti di Darker333, puoi farlo qui.
+    const LE_MIE_MODIFICHE = {
         "lukeskywalker": 53,
         "darthvader": 65
     };
 
-    const BASE_DARKER_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/";
+    const BASE_DARKER_DATA_URL = "https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/data/";
+    const iframe = document.getElementById('yasb-container');
 
-    const FILE_NAVI = [
-        // REBEL ALLIANCE
-        "pilots/rebel-alliance/a-uzit-gauntlet-fighter.json", "pilots/rebel-alliance/arc-170-starfighter.json", "pilots/rebel-alliance/attack-shuttle.json", "pilots/rebel-alliance/auzituck-gunship.json", "pilots/rebel-alliance/b-wing.json", "pilots/rebel-alliance/btl-a4-y-wing.json", "pilots/rebel-alliance/btl-s8-k-wing.json", "pilots/rebel-alliance/cr90-corellian-corvette.json", "pilots/rebel-alliance/e-wing.json", "pilots/rebel-alliance/fang-fighter.json", "pilots/rebel-alliance/gr-75-medium-transport.json", "pilots/rebel-alliance/hwk-290-light-freighter.json", "pilots/rebel-alliance/modified-yt-1300.json", "pilots/rebel-alliance/rz-1-a-wing.json", "pilots/rebel-alliance/sheathipede-class-shuttle.json", "pilots/rebel-alliance/t-65-x-wing.json", "pilots/rebel-alliance/tie-ln-fighter.json", "pilots/rebel-alliance/u-wing.json", "pilots/rebel-alliance/vcx-100-light-freighter.json", "pilots/rebel-alliance/v-wing.json", "pilots/rebel-alliance/yt-2400-light-freighter.json", "pilots/rebel-alliance/z-95-headhunter.json",
-        // GALACTIC EMPIRE
-        "pilots/galactic-empire/a-uzit-gauntlet-fighter.json", "pilots/galactic-empire/alpha-class-star-wing.json", "pilots/galactic-empire/firespray-class-patrol-craft.json", "pilots/galactic-empire/gozanti-class-cruiser.json", "pilots/galactic-empire/lambda-class-t-4a-shuttle.json", "pilots/galactic-empire/raider-class-corvette.json", "pilots/galactic-empire/tie-advanced-v1.json", "pilots/galactic-empire/tie-advanced-x1.json", "pilots/galactic-empire/tie-ag-aggressor.json", "pilots/galactic-empire/tie-ca-punisher.json", "pilots/galactic-empire/tie-d-defender.json", "pilots/galactic-empire/tie-in-interceptor.json", "pilots/galactic-empire/tie-ln-fighter.json", "pilots/galactic-empire/tie-ph-phantom.json", "pilots/galactic-empire/tie-rb-heavy.json", "pilots/galactic-empire/tie-reaper.json", "pilots/galactic-empire/tie-sa-bomber.json", "pilots/galactic-empire/tie-sk-striker.json", "pilots/galactic-empire/tie-v1-assault-shuttle.json", "pilots/galactic-empire/tie-vn-silencer.json", "pilots/galactic-empire/vt-49-decimator.json",
-        // SCUM AND VILLAINY
-        "pilots/scum-and-villainy/a-uzit-gauntlet-fighter.json", "pilots/scum-and-villainy/aggressor-assault-fighter.json", "pilots/scum-and-villainy/btl-a4-y-wing.json", "pilots/scum-and-villainy/croc-class-light-cruiser.json", "pilots/scum-and-villainy/customized-yt-1300-light-freighter.json", "pilots/scum-and-villainy/escape-craft.json", "pilots/scum-and-villainy/fang-fighter.json", "pilots/scum-and-villainy/firespray-class-patrol-craft.json", "pilots/scum-and-villainy/g-1a-starfighter.json", "pilots/scum-and-villainy/hwk-290-light-freighter.json", "pilots/scum-and-villainy/jumpmaster-5000.json", "pilots/scum-and-villainy/lancer-class-pursuit-craft.json", "pilots/scum-and-villainy/m3-a-interceptor.json", "pilots/scum-and-villainy/modified-tiener-freighter.json", "pilots/scum-and-villainy/quadrijet-transfer-spacetug.json", "pilots/scum-and-villainy/scavenged-yt-1300.json", "pilots/scum-and-villainy/starviper-class-attack-freighter.json", "pilots/scum-and-villainy/st-70-assault-ship.json", "pilots/scum-and-villainy/scurrg-h-6-bomber.json", "pilots/scum-and-villainy/tie-ln-fighter.json", "pilots/scum-and-villainy/yv-666-light-freighter.json", "pilots/scum-and-villainy/z-95-headhunter.json",
-        // ALTRE FAZIONI
-        "pilots/first-order/xi-class-light-shuttle.json", "pilots/first-order/tie-ba-interceptor.json", "pilots/first-order/tie-er-punisher.json", "pilots/first-order/tie-fo-fighter.json", "pilots/first-order/tie-sf-fighter.json", "pilots/first-order/tie-vn-silencer.json", "pilots/first-order/tie-wi-whisper-modified-interceptor.json", "pilots/first-order/upsilon-class-shuttle.json",
-        "pilots/resistance/fireball.json", "pilots/resistance/mg-1-starfortress.json", "pilots/resistance/scavenged-yt-1300.json", "pilots/resistance/t-70-x-wing.json", "pilots/resistance/rz-2-a-wing.json", "pilots/resistance/transport-pod.json", "pilots/resistance/resistance-transport.json",
-        "pilots/galactic-republic/arc-170-starfighter.json", "pilots/galactic-republic/eta-2-actis.json", "pilots/galactic-republic/naboo-royal-n-1-starfighter.json", "pilots/galactic-republic/btl-b-y-wing.json", "pilots/galactic-republic/v-19-torrent-starfighter.json", "pilots/galactic-republic/delta-7-aethersprite.json", "pilots/galactic-republic/delta-7b-aethersprite.json", "pilots/galactic-republic/laat-i-infantry-transport.json", "pilots/galactic-republic/cr90-corellian-corvette.json",
-        "pilots/separatist-alliance/belbullab-22-starfighter.json", "pilots/separatist-alliance/hyena-class-droid-bomber.json", "pilots/separatist-alliance/nantex-class-territorial-defense-starfighter.json", "pilots/separatist-alliance/sith-infiltrator.json", "pilots/separatist-alliance/vulture-class-droid-fighter.json", "pilots/separatist-alliance/tri-fighter.json", "pilots/separatist-alliance/hmp-droid-gunship.json", "pilots/separatist-alliance/rogue-class-starfighter.json"
-    ];
-
-    const FILE_UPGRADES = [
-        "upgrades/talent.json", "upgrades/astromech.json", "upgrades/torpedo.json", 
-        "upgrades/missile.json", "upgrades/crew.json", "upgrades/cannon.json", 
-        "upgrades/turret.json", "upgrades/sensor.json", "upgrades/device.json", 
-        "upgrades/modification.json", "upgrades/configuration.json", "upgrades/force-power.json", 
-        "upgrades/tech.json", "upgrades/illicit.json", "upgrades/title.json", "upgrades/gunner.json"
-    ];
-
-    let database = { pilots: [], upgrades: {} };
-    let currentSquad = [];
-    let currentFactionFilter = "all";
-    let currentShipFilter = "all";
-    let lockedFaction = null;
-
-    const FACTION_NAMES = {
-        "rebelalliance": "Ribelli", "galacticempire": "Impero Galattico", "scum": "Feccia",
-        "firstorder": "Primo Ordine", "resistance": "Resistenza", "galacticrepublic": "Repubblica", "separatistalliance": "Separatisti"
-    };
-
-    // Estrazione pulita per nomi unici incrociati (es: "Luke Skywalker (Battle of Yavin)" -> "luke skywalker")
-    function getCleanCoreName(str) {
-        if (!str) return "";
-        return str.toLowerCase()
-                  .replace(/[^a-z0-9 ]/g, "")
-                  .replace(/\b(crew|gunner|t65|xwing|pilot|battle of yavin|battle over endor|lsl|swz106)\b/gi, "")
-                  .trim();
-    }
-
-    function getCustomCost(item) {
-        if (I_MIEI_PUNTI[item.xws] !== undefined) return I_MIEI_PUNTI[item.xws];
-        if (item.cost && item.cost.value !== undefined) return item.cost.value;
-        if (typeof item.cost === 'number') return item.cost;
-        return item.points || 0;
-    }
-
-    async function loadDatabase() {
-        // 1. Caricamento Upgrades con allineamento chiavi reali nativi di Darker333
-        const upgradePromises = FILE_UPGRADES.map(async (file) => {
-            try {
-                const res = await fetch(BASE_DARKER_URL + file);
-                if (res.ok) {
-                    const data = await res.json();
-                    data.forEach(up => {
-                        const slotType = up.sides[0].type;
-                        if (!database.upgrades[slotType]) database.upgrades[slotType] = [];
-                        
-                        let restrictions = [];
-                        if (up.restrictions) {
-                            up.restrictions.forEach(r => {
-                                if (r.factions) restrictions.push({ type: 'factions', values: r.factions });
-                                if (r.sizes) restrictions.push({ type: 'sizes', values: r.sizes });
-                                if (r.ships) restrictions.push({ type: 'ships', values: r.ships });
-                            });
-                        }
-
-                        let grants = [];
-                        if (up.grants) {
-                            up.grants.forEach(g => {
-                                if (g.type === "slot") grants.push({ action: 'add', slot: g.value });
-                            });
-                        }
-
-                        database.upgrades[slotType].push({
-                            name: up.name,
-                            xws: up.xws,
-                            points: getCustomCost(up),
-                            restrictions: restrictions,
-                            limited: up.limited || 0,
-                            grants: grants
-                        });
-                    });
+    // Funzione per intercettare il caricamento del motore e forzare i dati personalizzati
+    iframe.onload = async function() {
+        try {
+            // Rimuove la schermata di caricamento appena il motore è pronto
+            setTimeout(() => {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.remove(), 500);
                 }
-            } catch (e) {}
-        });
+            }, 1000);
 
-        // 2. Caricamento Piloti e Unione Slot base Nave
-        const pilotPromises = FILE_NAVI.map(async (file) => {
-            try {
-                const res = await fetch(BASE_DARKER_URL + file);
-                if (res.ok) {
-                    const shipData = await res.json();
-                    let extraShipSlots = [];
-                    if (shipData.upgradeSlots) {
-                        shipData.upgradeSlots.forEach(s => {
-                            if (s.type === "Title" || s.type === "Configuration") extraShipSlots.push(s.type);
-                        });
-                    }
-
-                    if (shipData.pilots) {
-                        shipData.pilots.forEach(p => {
-                            let combinedSlots = [...(p.slots || []), ...extraShipSlots];
-                            database.pilots.push({
-                                name: p.name,
-                                xws: p.xws,
-                                faction: shipData.faction,
-                                ship: shipData.name,
-                                shipXws: shipData.xws,
-                                shipSize: shipData.size,
-                                points: getCustomCost(p),
-                                slots: combinedSlots,
-                                initiative: p.initiative || 1,
-                                limited: p.limited || 0
-                            });
-                        });
-                    }
-                }
-            } catch (e) {}
-        });
-
-        await Promise.all([...upgradePromises, ...pilotPromises]);
-        document.getElementById('loading-msg').innerHTML = `✅ Filtri Rigidi da Torneo Attivi.`;
-        generateFactionFilters();
-        renderFactions();
-    }
-
-    // REGISTRO UNICITÀ INCROCIATA (Pilota <-> Crew <-> Upgrade)
-    function isUpgradeLegal(upgrade, pilot, currentPilotUniqueId) {
-        const cleanUpName = getCleanCoreName(upgrade.name);
-
-        if (upgrade.limited > 0) {
-            // Controlla se il nome pulito esiste già tra i piloti in squadriglia
-            const usedAsPilot = currentSquad.some(p => getCleanCoreName(p.name) === cleanUpName);
-            if (usedAsPilot) return false;
-
-            // Controlla se il nome pulito è già usato in un altro slot di qualsiasi nave
-            const usedAsUpgrade = currentSquad.some(p => 
-                p.equippedUpgrades && p.equippedUpgrades.some(u => u && getCleanCoreName(u.name) === cleanUpName && p.uniqueId !== currentPilotUniqueId)
-            );
-            if (usedAsUpgrade) return false;
-        }
-
-        // Corretto il bug di Yoda: Mappatura precisa degli ID YASB nativi di Darker333
-        if (upgrade.restrictions && upgrade.restrictions.length > 0) {
-            for (const r of upgrade.restrictions) {
-                if (r.type === 'factions' && !r.values.includes(pilot.faction)) return false;
-                if (r.type === 'sizes' && !r.values.includes(pilot.shipSize)) return false;
-                if (r.type === 'ships' && !r.values.includes(pilot.shipXws)) return false;
-            }
-        }
-        return true;
-    }
-
-    function generateFactionFilters() {
-        const filtersDiv = document.getElementById('faction-filters');
-        filtersDiv.innerHTML = '<button class="btn btn-warning btn-sm filter-btn" id="btn-f-all" onclick="filterFaction(\'all\')">MOSTRA TUTTE</button>';
-        const activeFactions = [...new Set(database.pilots.map(p => p.faction))];
-        activeFactions.forEach(fId => {
-            filtersDiv.innerHTML += `<button class="btn btn-outline-secondary btn-sm filter-btn text-white" id="btn-f-${fId}" onclick="filterFaction('${fId}')">${FACTION_NAMES[fId] || fId}</button>`;
-        });
-    }
-
-    window.filterFaction = function(factionId) {
-        currentFactionFilter = factionId; currentShipFilter = "all";
-        document.querySelectorAll('#faction-filters .btn').forEach(btn => btn.classList.replace('btn-warning', 'btn-outline-secondary'));
-        const activeBtn = document.getElementById(`btn-f-${factionId}`);
-        if(activeBtn) activeBtn.classList.add('btn-warning');
-        generateShipFilters(factionId); renderFactions();
-    };
-
-    function generateShipFilters(factionId) {
-        const row = document.getElementById('ship-filters-row'); const container = document.getElementById('ship-filters');
-        if (factionId === 'all') { row.setAttribute('style', 'display: none !important;'); return; }
-        row.setAttribute('style', 'display: block !important;');
-        container.innerHTML = '<button class="btn btn-warning btn-sm filter-btn" id="btn-s-all" onclick="filterShip(\'all\')">TUTTE LE NAVI</button>';
-        const factionPilots = database.pilots.filter(p => p.faction === factionId);
-        const ships = [...new Set(factionPilots.map(p => p.ship))].sort();
-        ships.forEach(shipName => {
-            const cleanId = btoa(encodeURIComponent(shipName)).replace(/=/g, "");
-            container.innerHTML += `<button class="btn btn-outline-light btn-sm filter-btn" id="btn-s-${cleanId}" onclick="filterShip('${shipName}')">${shipName}</button>`;
-        });
-    }
-
-    window.filterShip = function(shipName) {
-        currentShipFilter = shipName;
-        document.querySelectorAll('#ship-filters .btn').forEach(btn => btn.classList.replace('btn-warning', 'btn-outline-light'));
-        const cleanId = shipName === 'all' ? 'all' : btoa(encodeURIComponent(shipName)).replace(/=/g, "");
-        const activeBtn = document.getElementById(`btn-s-${cleanId}`);
-        if(activeBtn) activeBtn.classList.add('btn-warning');
-        renderFactions();
-    };
-
-    function renderFactions() {
-        const container = document.getElementById('factions-container'); container.innerHTML = "";
-        let filteredPilots = database.pilots;
-        
-        // SBARRAMENTO FAZIONE UNICA: Se c'è un pilota in lista, cancella visivamente tutte le altre fazioni
-        if (lockedFaction !== null) {
-            filteredPilots = filteredPilots.filter(p => p.faction === lockedFaction);
-        } else if (currentFactionFilter !== 'all') {
-            filteredPilots = filteredPilots.filter(p => p.faction === currentFactionFilter);
-        }
-        
-        if (currentShipFilter !== 'all') filteredPilots = filteredPilots.filter(p => p.ship === currentShipFilter);
-
-        const factions = [...new Set(filteredPilots.map(p => p.faction))];
-        factions.forEach(factionId => {
-            const factionPilots = filteredPilots.filter(p => p.faction === factionId);
-            let factionHtml = `<div class="faction-section"><h2 class="faction-header">${FACTION_NAMES[factionId] || factionId}</h2><div class="row">`;
-            factionPilots.sort((a, b) => a.ship !== b.ship ? a.ship.localeCompare(b.ship) : b.initiative - a.initiative);
-
-            factionPilots.forEach(pilot => {
-                const index = database.pilots.indexOf(pilot);
-                
-                // Controllo Unicità Incrociata Pilota a schermo
-                const pilotCleanName = getCleanCoreName(pilot.name);
-                const isUsedAsCrew = currentSquad.some(s => 
-                    s.equippedUpgrades && s.equippedUpgrades.some(u => u && getCleanCoreName(u.name) === pilotCleanName)
-                );
-                const isPilotUniqueAndUsed = (pilot.limited > 0 && currentSquad.some(s => s.xws === pilot.xws)) || isUsedAsCrew;
-
-                let btnClass = "btn-add"; let btnAction = `onclick="addPilotToSquad(${index})"`; let btnText = "+ Aggiungi";
-
-                if (isPilotUniqueAndUsed) {
-                    btnClass = "btn-disabled"; btnAction = ""; btnText = "Incompatibile (Unico)";
-                }
-
-                factionHtml += `
-                    <div class="col-sm-6 col-lg-4">
-                        <div class="card-custom shadow-sm">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h6 class="mb-1 text-white fw-bold">(${pilot.initiative}) ${pilot.name} ${pilot.limited > 0 ? '•' : ''}</h6>
-                                <span class="badge badge-points">${pilot.points} pt</span>
-                            </div>
-                            <p class="pilot-ship-name mb-2">${pilot.ship} (${pilot.shipSize})</p>
-                            <button class="btn btn-sm ${btnClass} w-100 fw-bold py-1" ${btnAction}>${btnText}</button>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML += factionHtml + `</div></div>`;
-        });
-    }
-
-    window.addPilotToSquad = function(index) {
-        const pilot = database.pilots[index];
-        if (currentSquad.length === 0) lockedFaction = pilot.faction;
-
-        const squadItem = { 
-            ...pilot, 
-            uniqueId: Date.now() + Math.random(), 
-            activeSlots: [...pilot.slots], // Traccia gli slot correnti ricalcolabili
-            equippedUpgrades: Array(pilot.slots.length).fill(null) // Array speculare piatto per salvare gli oggetti scelti
-        };
-        currentSquad.push(squadItem);
-        renderFactions(); updateSquadUI();
-    };
-
-    window.removePilot = function(uniqueId) {
-        currentSquad = currentSquad.filter(p => p.uniqueId !== uniqueId);
-        if (currentSquad.length === 0) lockedFaction = null;
-        renderFactions(); updateSquadUI();
-    };
-
-    window.changeUpgrade = function(pilotUniqueId, slotIndex, upgradeXws) {
-        const pilot = currentSquad.find(p => p.uniqueId === pilotUniqueId);
-        if (pilot) {
-            const currentSlotType = pilot.activeSlots[slotIndex];
+            // Comunicazione con il core di YASB per l'aggiornamento dinamico dei vettori dei costi
+            // Leggiamo la struttura dei piloti direttamente dal file dei punti centralizzato di Darker se presente, 
+            // altrimenti forziamo la sovrascrittura a runtime nel local storage dell'applicazione
             
-            if (upgradeXws === "none") {
-                pilot.equippedUpgrades[slotIndex] = null;
-            } else {
-                let found = null;
-                if (database.upgrades[currentSlotType]) {
-                    found = database.upgrades[currentSlotType].find(u => u.xws === upgradeXws);
-                }
-                pilot.equippedUpgrades[slotIndex] = found;
-            }
+            // Inviamo un payload di configurazione all'istanza del builder
+            const configPayload = {
+                source: "pandorum-builder",
+                customPoints: LE_MIE_MODIFICHE,
+                dataSource: BASE_DARKER_DATA_URL
+            };
+
+            // Configurazione delle opzioni di memorizzazione locale per forzare YASB a usare i dati Legacy modificati
+            iframe.contentWindow.postMessage(JSON.stringify(configPayload), "*");
             
-            // ARCHITETTURA DI RICALCOLO A CASCATA IMMUTABILE (Risolve Imperial Super Commandos)
-            // Rigeneriamo l'intera scheda partendo dagli slot base nativi
-            let newSlots = [...pilot.slots];
-            let newEquipped = [];
-
-            // Trasferiamo le vecchie scelte compatibili con gli slot base
-            pilot.slots.forEach((slot, idx) => {
-                newEquipped[idx] = (pilot.equippedUpgrades[idx] && pilot.slots[idx] === pilot.activeSlots[idx]) ? pilot.equippedUpgrades[idx] : null;
-            });
-
-            // Scansione per intercettare i grants (modificatori) delle carte attive e iniettare gli slot extra
-            newEquipped.forEach(up => {
-                if (up && up.grants) {
-                    up.grants.forEach(g => {
-                        if (g.action === 'add') {
-                            newSlots.push(g.slot);
-                            newEquipped.push(null); // Allunga l'array delle selezioni in modo simmetrico
-                        }
-                    });
-                }
-            });
-
-            // Applichiamo la nuova struttura sovrascrivendo la vecchia in blocco
-            pilot.activeSlots = newSlots;
-            pilot.equippedUpgrades = newEquipped;
-
-            renderFactions(); // Sincronizza all'istante l'unicità sul pannello di sinistra
-            updateSquadUI();
+        } catch (error) {
+            console.error("Errore durante l'iniezione del motore dei punti:", error);
         }
     };
-
-    function updateSquadUI() {
-        const content = document.getElementById('squad-content'); const totalPointsSpan = document.getElementById('total-points');
-        if (currentSquad.length === 0) {
-            content.innerHTML = `<p class="text-muted italic">Nessun pilota selezionato.</p>`;
-            totalPointsSpan.innerText = "0 / 200"; return;
-        }
-
-        let totalPoints = 0; let html = "";
-
-        currentSquad.forEach(pilot => {
-            let pilotTotalCost = pilot.points;
-            let upgradesHtml = "";
-
-            pilot.activeSlots.forEach((slotType, i) => {
-                const currentSelected = pilot.equippedUpgrades[i];
-                const rawUpgrades = database.upgrades[slotType] || [];
-                const legalUpgrades = rawUpgrades.filter(up => isUpgradeLegal(up, pilot, pilot.uniqueId));
-                
-                if (currentSelected) pilotTotalCost += currentSelected.points;
-
-                upgradesHtml += `
-                    <div class="mb-2">
-                        <label class="slot-title">${slotType}</label>
-                        <select class="upgrade-select" onchange="changeUpgrade(${pilot.uniqueId}, ${i}, this.value)">
-                            <option value="none">Vuoto</option>
-                            ${currentSelected ? `<option value="${currentSelected.xws}" selected>${currentSelected.name} (+${currentSelected.points}pt)</option>` : ''}
-                            ${legalUpgrades.map(up => (currentSelected && currentSelected.xws === up.xws) ? '' : `
-                                <option value="${up.xws}">${up.name} (+${up.points}pt)</option>
-                            `).join('')}
-                        </select>
-                    </div>
-                `;
-            });
-
-            totalPoints += pilotTotalCost;
-            html += `
-                <div class="p-3 mb-2 rounded shadow-sm" style="background-color: #252525; border: 1px solid #444;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-white fw-bold" style="font-size:0.85rem;">${pilot.limited > 0 ? '• ' : ''}${pilot.name}</span>
-                        <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:0.65rem;" onclick="removePilot(${pilot.uniqueId})">X</button>
-                    </div>
-                    <div class="text-warning small mb-2" style="font-size:0.75rem;">${pilotTotalCost} pt <span class="text-muted">(${pilot.ship})</span></div>
-                    ${pilot.activeSlots.length > 0 ? `<div class="upgrade-row">${upgradesHtml}</div>` : ''}
-                </div>
-            `;
-        });
-
-        content.innerHTML = html; totalPointsSpan.innerText = `${totalPoints} / 200`;
-    }
-
-    window.onload = loadDatabase;
 </script>
 
 </body>
