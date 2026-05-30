@@ -415,9 +415,16 @@ span.select2-chosen > i.xwing-miniatures-font {
   max-height: 300px !important; }
   .select2-results .select2-result-not-in-collection {
     color: #a00; }
+  .select2-results .pandorum-modified-pilot {
+    color: #b00020;
+    font-weight: 700; }
   .select2-results .select2-disabled {
     color: gray;
     background-color: lightgray; }
+
+span.select2-chosen .pandorum-modified-pilot {
+  color: #b00020;
+  font-weight: 700; }
 
 .card-restriction {
   font-style: italic;
