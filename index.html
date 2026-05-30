@@ -2,28 +2,32 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Wing Squad Builder - Pandorum Custom Legacy</title>
+    <title>X-Wing Pandorum Builder</title>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #121212;
-            overflow: hidden;
-        }
-        #yasb-container {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        #builder-frame { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
 
-<!-- Carichiamo il motore passandogli la repo di Darker DIRETTAMENTE come sorgente dati ufficiale nell'URL -->
-<iframe id="yasb-container" src="https://xwing-legacy.com/?data=https://raw.githubusercontent.com/Darker333/xwing-data2-legacy/master/" title="X-Wing Legacy Squad Builder"></iframe>
+<iframe id="builder-frame" src="https://xwing-legacy.com/" title="X-Wing Builder"></iframe>
+
+<script>
+    const iframe = document.getElementById('builder-frame');
+    const customPointsUrl = 'https://raw.githubusercontent.com/albogarelli/pandorumbuilder/master/custom/pandorum.json';
+
+    // Una volta caricato il builder, inviamo i tuoi punti personalizzati
+    iframe.onload = function() {
+        fetch(customPointsUrl)
+            .then(response => response.json())
+            .then(data => {
+                iframe.contentWindow.postMessage({
+                    type: 'points_override',
+                    data: data
+                }, '*');
+            });
+    };
+</script>
 
 </body>
 </html>
