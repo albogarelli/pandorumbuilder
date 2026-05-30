@@ -4,29 +4,43 @@
     <meta charset="UTF-8">
     <title>X-Wing Pandorum Builder</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-        #builder-frame { width: 100%; height: 100%; border: none; }
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
+        #menu-bar { background: #333; color: white; padding: 10px; text-align: center; font-family: sans-serif; }
+        #builder-frame { flex-grow: 1; border: none; width: 100%; }
     </style>
 </head>
 <body>
+
+<div id="menu-bar">
+    Modalità Builder: 
+    <select id="mode-selector" onchange="updateMode()">
+        <option value="standard">Standard (Ufficiale)</option>
+        <option value="pandorum">Pandorum (Tutti i piloti modificabili)</option>
+    </select>
+</div>
 
 <iframe id="builder-frame" src="https://xwing-legacy.com/" title="X-Wing Builder"></iframe>
 
 <script>
     const iframe = document.getElementById('builder-frame');
-    const customPointsUrl = 'https://raw.githubusercontent.com/albogarelli/pandorumbuilder/master/custom/pandorum.json';
+    // Assicurati che questo percorso corrisponda esattamente a dove hai caricato pandorum_test.json su GitHub
+    const pandorumUrl = 'https://raw.githubusercontent.com/albogarelli/pandorumbuilder/master/custom/pandorum_test.json';
 
-    // Una volta caricato il builder, inviamo i tuoi punti personalizzati
-    iframe.onload = function() {
-        fetch(customPointsUrl)
-            .then(response => response.json())
-            .then(data => {
-                iframe.contentWindow.postMessage({
-                    type: 'points_override',
-                    data: data
-                }, '*');
-            });
-    };
+    function updateMode() {
+        const mode = document.getElementById('mode-selector').value;
+        if (mode === 'pandorum') {
+            fetch(pandorumUrl)
+                .then(r => r.json())
+                .then(data => {
+                    // Invio dei punti personalizzati al builder
+                    iframe.contentWindow.postMessage({ type: 'points_override', data: data }, '*');
+                    alert('Modalità Pandorum attiva: punti caricati!');
+                });
+        } else {
+            // Ricarica il builder per tornare allo standard
+            iframe.src = 'https://xwing-legacy.com/';
+        }
+    }
 </script>
 
 </body>
